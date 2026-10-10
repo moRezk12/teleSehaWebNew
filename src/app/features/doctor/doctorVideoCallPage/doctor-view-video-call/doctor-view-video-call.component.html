@@ -1,0 +1,63 @@
+@if (isMeetingValid) {
+<section class="videocall relative h-screen overflow-hidden">
+
+  <div class="flex justify-between items-center h-full">
+    <div class="w-full md:w-[60%] h-[calc(100vh-100px)]">
+      <app-doctor-meeting-video-call
+        (openWhatsapp)="showWhatsapp = true"
+        (participantJoined)="refreshMeetingReport()"
+      ></app-doctor-meeting-video-call>
+    </div>
+
+    <div class="hidden md:block w-full md:w-[40%] h-[calc(100vh-100px)] px-[20px]">
+      <!-- نسبة التحسن اللي سجّلها المريض قبل دخوله المتابعة -->
+      @if (meetingReport?.isFollowUp && meetingReport?.satisfactionRatio) {
+        <div class="flex items-center gap-3 mb-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+          <i class="fa-solid fa-arrow-trend-up text-emerald-600"></i>
+          <span class="text-emerald-800 text-sm font-bold">
+            {{ 'doctor.improvementRate' | translate }}:
+            <span class="text-emerald-600 font-extrabold">{{ meetingReport.satisfactionRatio }}%</span>
+          </span>
+        </div>
+      }
+
+      <div class="h-[70vh]">
+        <app-doctor-chat-video-call [checkUpIdInput]="meetingReport?.checkUpId"></app-doctor-chat-video-call>
+      </div>
+
+      <app-popup-doctor></app-popup-doctor>
+
+    </div>
+  </div>
+
+</section>
+
+
+
+@if(showWhatsapp){
+<div class="fixed inset-0 bg-[#000]/90 z-[999999999999999] flex flex-col p-[20px] ">
+
+  <button class="absolute top-4 right-4 text-white text-2xl" (click)="showWhatsapp = false">
+    ✕
+  </button>
+
+  <div class="w-full h-[80vh] ">
+    <app-doctor-chat-video-call [checkUpIdInput]="meetingReport?.checkUpId"></app-doctor-chat-video-call>
+
+  </div>
+  <div>
+    <app-popup-doctor></app-popup-doctor>
+  </div>
+
+</div>
+}
+}
+
+@if (isValidating) {
+  <div class="flex justify-center items-center h-screen bg-[#001725] text-white">
+    <div class="text-center">
+      <i class="fa-solid fa-circle-notch fa-spin text-5xl mb-4 text-[#007BBD]"></i>
+      <p class="text-lg font-semibold tracking-wide">جاري التحقق من صلاحية الجلسة...</p>
+    </div>
+  </div>
+}

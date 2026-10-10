@@ -1,0 +1,80 @@
+<div>
+  <form [formGroup]="radiologyForm" (ngSubmit)="submitRadiology()">
+
+    <div formArrayName="examinations">
+
+      @for (item of radiologyMedicines.controls; track item) {
+
+      <div class="ts-item-card" [formGroupName]="$index">
+
+        <!-- Label -->
+        <div class="ts-item-label">
+          <span class="ts-item-number radiology">{{ $index + 1 }}</span>
+          <span class="ts-item-label-text">Examination {{ $index + 1 }}</span>
+        </div>
+
+        <!-- Select -->
+        <div class="ts-select-wrapper relative">
+          <p-select
+            class="custom-select w-full"
+            formControlName="id"
+            optionValue="id"
+            [options]="radiology"
+            optionLabel="name"
+            [filter]="true"
+            (onFilter)="onRadiologySearch($event)"
+            (onChange)="onRadiologySelect($event, $index)"
+            placeholder="Select the examination">
+          </p-select>
+          <!-- Small inline search indicator — lookup must not raise the page spinner -->
+          @if (isSearching) {
+            <span class="absolute top-1/2 -translate-y-1/2 ltr:right-10 rtl:left-10 text-slate-400 pointer-events-none">
+              <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+            </span>
+          }
+        </div>
+
+        <!-- Notes for this examination -->
+        <div class="mt-2.5">
+          <input type="text" formControlName="notes" placeholder="Notes for this scan (optional)"
+            class="ts-input text-xs h-9 px-3 py-1 bg-white border border-slate-200 rounded-lg w-full focus:border-[#007BBD] focus:outline-none">
+        </div>
+
+        <!-- Remove Button -->
+        @if (radiologyMedicines.length > 1) {
+        <button type="button" (click)="removeRadiology($index)" class="ts-item-remove">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        }
+
+      </div>
+
+      }
+
+    </div>
+
+    <!-- Add -->
+    <button type="button" (click)="addRadiology()" class="ts-add-btn">
+      <span class="ts-add-icon">+</span>
+      Add another examination
+    </button>
+
+    <!-- Notes -->
+    <div class="ts-notes-section">
+      <label class="ts-notes-label">
+        General Notes (optional)
+      </label>
+      <input type="text" formControlName="notes" placeholder="Enter general notes or unlisted radiology"
+        class="ts-input">
+    </div>
+
+    <!-- Submit -->
+    <div class="ts-submit-section">
+      <button type="submit" class="ts-btn-primary w-full">
+        <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>
+        Send Radiology Request
+      </button>
+    </div>
+
+  </form>
+</div>

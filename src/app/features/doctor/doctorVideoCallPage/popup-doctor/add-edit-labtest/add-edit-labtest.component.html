@@ -1,0 +1,80 @@
+<div>
+  <form [formGroup]="labTestForm" (ngSubmit)="submitLabTest()">
+
+    <div formArrayName="labAnalysisList">
+
+      @for (item of labTestMedicines.controls; track $index; let i = $index) {
+
+      <div class="ts-item-card" [formGroupName]="$index">
+
+        <!-- Label -->
+        <div class="ts-item-label">
+          <span class="ts-item-number labtest">{{ $index + 1 }}</span>
+          <span class="ts-item-label-text">Test {{ $index + 1 }}</span>
+        </div>
+
+        <!-- Select -->
+        <div class="ts-select-wrapper relative">
+          <p-select
+            class="custom-select w-full"
+            formControlName="id"
+            [options]="labTest"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            (onFilter)="onLabTestSearch($event)"
+            (onChange)="onLabTestSelect($event, i)"
+            placeholder="Select the lab test">
+          </p-select>
+          <!-- Small inline search indicator — lookup must not raise the page spinner -->
+          @if (isSearching) {
+            <span class="absolute top-1/2 -translate-y-1/2 ltr:right-10 rtl:left-10 text-slate-400 pointer-events-none">
+              <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+            </span>
+          }
+        </div>
+
+        <!-- Notes for this test -->
+        <div class="mt-2.5">
+          <input type="text" formControlName="notes" placeholder="Notes for this test (optional)"
+            class="ts-input text-xs h-9 px-3 py-1 bg-white border border-slate-200 rounded-lg w-full focus:border-[#007BBD] focus:outline-none">
+        </div>
+
+        <!-- Remove Button -->
+        @if (labTestMedicines.length > 1) {
+        <button type="button" (click)="removeLabTest($index)" class="ts-item-remove">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        }
+
+      </div>
+
+      }
+
+    </div>
+
+    <!-- Add -->
+    <button type="button" (click)="addLabTest()" class="ts-add-btn">
+      <span class="ts-add-icon">+</span>
+      Add another test
+    </button>
+
+    <!-- Notes -->
+    <div class="ts-notes-section">
+      <label class="ts-notes-label">
+        General Notes (optional)
+      </label>
+      <input type="text" formControlName="notes" placeholder="Enter general notes or special instructions"
+        class="ts-input">
+    </div>
+
+    <!-- Submit -->
+    <div class="ts-submit-section">
+      <button type="submit" class="ts-btn-primary w-full">
+        <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>
+        Send Lab Request
+      </button>
+    </div>
+
+  </form>
+</div>

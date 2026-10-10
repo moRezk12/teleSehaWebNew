@@ -1,0 +1,414 @@
+@if (isMeetingValid) {
+<section class="videocall relative h-screen overflow-hidden">
+
+  <!-- Meeting Layout -->
+  <div class="flex justify-between items-center h-full">
+    <div class="w-full md:w-[60%] h-[calc(100vh-100px)]">
+      <app-patient-meeting-video-call (sessionEnded)="handleSessionEnded()"
+        (openWhatsapp)="showWhatsapp = true">
+      </app-patient-meeting-video-call>
+
+    </div>
+
+    <div class="hidden md:block w-full md:w-[40%] h-[calc(100vh-100px)] px-[20px]">
+      <div class="h-[70vh] ">
+        <app-patient-chat-video-call [checkUpIdInput]="meetingReport?.checkUpId ?? sessionId"></app-patient-chat-video-call>
+      </div>
+      <div>
+        <app-patient-send-picture-video-call [checkUpIdInput]="meetingReport?.checkUpId ?? sessionId"></app-patient-send-picture-video-call>
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<!-- WhatsApp Overlay -->
+@if(showWhatsapp){
+<div class="fixed inset-0 bg-[#000]/90 z-[9999] flex flex-col p-[20px] ">
+
+  <!-- Close Button -->
+  <button class="absolute top-4 right-4 text-white text-2xl" (click)="showWhatsapp = false">
+    ✕
+  </button>
+
+  <!-- WhatsApp Content -->
+  <div class="w-full h-[80vh] ">
+    <app-patient-chat-video-call [checkUpIdInput]="meetingReport?.checkUpId ?? sessionId"></app-patient-chat-video-call>
+  </div>
+  <div>
+    <app-patient-send-picture-video-call [checkUpIdInput]="meetingReport?.checkUpId ?? sessionId"></app-patient-send-picture-video-call>
+  </div>
+
+</div>
+}
+
+
+
+<!-- popup -->
+@if(showPopupSessionSuccess){
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card text-center p-8 max-w-lg relative" style="animation: ts-modal-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+    <!-- زرار الإغلاق: لو المريض رجع في كلامه يقدر يقفل الكارت من غير ما يكمل -->
+    <button (click)="closePopupSessionSuccess()"
+            class="absolute top-4 right-4 rtl:left-4 rtl:right-auto w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    <div class="w-40 h-40 mx-auto mb-6 transform scale-110">
+      <img class="w-full h-full object-contain" src="../../../../../assets/images/Confetti Selector.png" loading="lazy" alt="Confetti">
+    </div>
+    <h3 class="text-slate-800 text-2xl font-bold leading-tight mb-2">
+      Thank you!
+    </h3>
+    <p class="text-slate-500 text-sm font-semibold mb-8">
+      Your consultation session has ended successfully.
+    </p>
+
+    <div class="w-full md:w-3/4 mx-auto">
+      <button (click)="openshowPopupRating()" class="w-full ts-btn-primary gap-2 flex items-center justify-center">
+        <i class="fa-solid fa-star-half-stroke"></i>
+        Rate Doctor & Session
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- Doctor Rating -->
+@if(showPopupRating){
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card" style="max-width: 580px;">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon prescription" style="color: #ffb703; background: rgba(255, 183, 3, 0.1);">
+        <i class="fa-solid fa-star"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Doctor's Rating</h3>
+        <p>Share your feedback about the consultation session</p>
+      </div>
+      <button class="ts-modal-close" (click)="showPopupRating = false">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <form [formGroup]="ratingForm">
+        
+        <!-- Doctor Card -->
+        <div class="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-2xl mb-6 text-left">
+          <img class="w-20 h-20 rounded-xl object-cover shadow-sm border border-white" src="../../../../../assets/images/Group 76674.png" loading="lazy" alt="Doctor profile">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <h4 class="text-slate-800 font-bold text-base">Dr Mohamed Ali</h4>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-50 text-amber-600 gap-1">
+                4.9 <i class="fa-solid fa-star"></i>
+              </span>
+            </div>
+            <p class="text-slate-500 text-xs font-bold mb-1.5">General Internal Medicine</p>
+            <p class="text-slate-400 text-[10px] font-medium">(Number of Consultations: 233)</p>
+          </div>
+        </div>
+
+        <!-- Rating Session Stars -->
+        <div class="text-center mb-6">
+          <h4 class="text-slate-700 text-sm font-bold mb-3">Rate your session with the doctor</h4>
+          <div class="flex justify-center gap-2">
+            @for (star of [1,2,3,4,5]; track $index) {
+            <button type="button" class="border-0 bg-transparent p-0 cursor-pointer outline-none transition-transform active:scale-95" (click)="setRating(star)">
+              <i class="fa-solid fa-star text-3xl transition-colors duration-150"
+                [class.text-[#FFC107]]="star <= selectedRating" [class.text-slate-200]="star > selectedRating">
+              </i>
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Advantages Tags -->
+        <div class="mb-6">
+          <h4 class="text-slate-700 text-sm font-bold mb-3 text-left">What went well?</h4>
+          <div class="flex flex-wrap gap-2.5 justify-center sm:justify-start">
+            
+            <!-- Tag 1 -->
+            <button type="button" (click)="toggleAdvantage('is_first_advantage')"
+              [class]="ratingForm.value.is_first_advantage ? 'bg-blue-50 border-blue-200 text-[#007BBD]' : 'bg-white border-slate-200 text-slate-600'"
+              class="flex items-center gap-2 border px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-slate-50 cursor-pointer shadow-2xs">
+              <i class="fa-regular fa-message"></i>
+              Explains clearly
+            </button>
+
+            <!-- Tag 2 -->
+            <button type="button" (click)="toggleAdvantage('is_second_advantage')"
+              [class]="ratingForm.value.is_second_advantage ? 'bg-blue-50 border-blue-200 text-[#007BBD]' : 'bg-white border-slate-200 text-slate-600'"
+              class="flex items-center gap-2 border px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-slate-50 cursor-pointer shadow-2xs">
+              <i class="fa-solid fa-ear-listening"></i>
+              Good listener
+            </button>
+
+            <!-- Tag 3 -->
+            <button type="button" (click)="toggleAdvantage('is_third_advantage')"
+              [class]="ratingForm.value.is_third_advantage ? 'bg-blue-50 border-blue-200 text-[#007BBD]' : 'bg-white border-slate-200 text-slate-600'"
+              class="flex items-center gap-2 border px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 hover:bg-slate-50 cursor-pointer shadow-2xs">
+              <i class="fa-regular fa-face-smile"></i>
+              Friendly
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Comments Feed -->
+        <div class="mb-6 text-left">
+          <h4 class="text-slate-700 text-sm font-bold mb-2">What’s your feedback on the session?</h4>
+          <input formControlName="review" type="text" placeholder="Write your review comments here..." class="ts-input">
+        </div>
+
+        <!-- Call Time Rating -->
+        <div class="mb-6 border-t border-slate-100 pt-5 text-left">
+          <h4 class="text-slate-700 text-sm font-bold mb-3">How sufficient was the consultation time?</h4>
+          <div class="flex gap-2">
+            @for (star of [1,2,3,4,5]; track $index) {
+            <button type="button" class="border-0 bg-transparent p-0 cursor-pointer outline-none transition-transform active:scale-95" (click)="setCallTimeRating(star)">
+              <i class="fa-solid fa-star text-2xl transition-colors duration-150"
+                [class.text-[#FFC107]]="star <= selectedCallTimeRating" [class.text-slate-200]="star > selectedCallTimeRating">
+              </i>
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="ts-submit-section">
+          <button type="button" (click)="ratingReview()" class="w-full ts-btn-primary">
+            Send Rating
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+}
+
+
+<!-- Prescription Popup -->
+@if(showPopupPrescription){
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card" style="max-width: 650px;">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon prescription">
+        <i class="fa-solid fa-file-medical"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>تقرير الجلسة</h3>
+        <p>RX-{{ meetingReport?.prescription?.id || 'لم يتم إصدار روشتة' }}</p>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="ts-tabs-container">
+      <button class="ts-tab-btn" [class.active]="currentSection === 0" (click)="setSection(0)">
+        <i class="fa-solid fa-flask-vial"></i>
+        التحاليل
+      </button>
+      <button class="ts-tab-btn" [class.active]="currentSection === 1" (click)="setSection(1)">
+        <i class="fa-solid fa-x-ray"></i>
+        الأشعة
+      </button>
+      <button class="ts-tab-btn" [class.active]="currentSection === 2" (click)="setSection(2)">
+        <i class="fa-solid fa-pills"></i>
+        الروشتة
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      
+      <div id="videoCallReportContent" class="rpt-doc">
+        <!-- PDF Platform Branding Header -->
+        <div class="rpt-pdf-header">
+          <div class="rpt-pdf-brand">
+            <img src="assets/images/Group 76373.svg" class="rpt-pdf-logo" alt="teleSEHA Logo" />
+            <div class="rpt-pdf-brand-text">
+              <h2 class="rpt-pdf-brand-title">منصة تلي صحة الطبية</h2>
+              <span class="rpt-pdf-brand-sub">teleSEHA Telemedicine Platform</span>
+            </div>
+          </div>
+          <div class="rpt-pdf-meta">
+            <span class="rpt-pdf-badge">
+              @if(currentSection === 0){ <i class="fa-solid fa-flask-vial"></i> طلب تحاليل معتمد }
+              @if(currentSection === 1){ <i class="fa-solid fa-x-ray"></i> طلب أشعة معتمد }
+              @if(currentSection === 2){ <i class="fa-solid fa-prescription"></i> روشتة طبية معتمدة }
+            </span>
+            <p class="rpt-pdf-id">
+              @if(currentSection === 0){ LAB-{{ meetingReport?.labAnalysisRequest?.id || '—' }} }
+              @if(currentSection === 1){ RAD-{{ meetingReport?.radiologicalExaminationRequest?.id || '—' }} }
+              @if(currentSection === 2){ RX-{{ meetingReport?.prescription?.id || '—' }} }
+            </p>
+            @if (meetingReport?.createdAt || agoraDetailsPatient?.checkUpDate) {
+            <span class="rpt-pdf-date">{{ (meetingReport?.createdAt || agoraDetailsPatient?.checkUpDate) | date: 'dd/MM/yyyy - hh:mm a' }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="rpt-pdf-divider"></div>
+
+        <!-- Doctor & Patient Info Panel -->
+        <div class="rpt-parties">
+          <div>
+            <span class="rpt-label">الطبيب المعالج / Doctor</span>
+            <div class="rpt-doc-name">
+              <span>{{ agoraDetailsPatient?.doctor?.name || meetingReport?.doctorName || 'غير متاح' }}</span>
+              @if (agoraDetailsPatient?.doctor?.rating) {
+              <span class="rpt-star"><i class="fa-solid fa-star"></i> {{ agoraDetailsPatient.doctor.rating }}</span>
+              }
+            </div>
+            <p class="rpt-muted">{{ agoraDetailsPatient?.doctor?.speciality || meetingReport?.doctorSpecialty || 'تخصص عام' }}</p>
+            @if (agoraDetailsPatient?.doctor?.licenseNumber) {
+            <p class="text-[11px] text-slate-500 font-semibold mt-1">ترخيص: <span class="text-[#007BBD] font-bold">{{ agoraDetailsPatient.doctor.licenseNumber }}</span></p>
+            }
+          </div>
+          <div class="rpt-patient">
+            <span class="rpt-label">المريض / Patient</span>
+            <p class="rpt-strong">{{ agoraDetailsPatient?.patientName || meetingReport?.patientName || 'اسم المريض غير متاح' }}</p>
+            @if (meetingReport?.createdAt || agoraDetailsPatient?.checkUpDate) {
+            <p class="rpt-muted">تاريخ الكشف: {{ (meetingReport?.createdAt || agoraDetailsPatient?.checkUpDate) | date: 'dd/MM/yyyy' }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Section Content Requests Card -->
+        <div class="rpt-section">
+          @if(currentSection === 0){
+          <!-- Lab Analyses -->
+          <div>
+            <h4 class="rpt-h">
+              <span class="rpt-bar"></span> طلب تحاليل طبية / Lab Analysis Requests
+            </h4>
+            <div *ngIf="meetingReport?.labAnalysisRequest?.labAnalyses?.length; else labNotFound" class="rpt-grid">
+              <div *ngFor="let lab of meetingReport.labAnalysisRequest.labAnalyses" class="rpt-item">
+                <h5><i class="fa-solid fa-flask-vial text-[#007bbd] mr-1.5"></i>{{ lab.name }}</h5>
+                <p><i class="fa-regular fa-comment-dots mr-1"></i>الملاحظات: {{ lab.notes || 'لا يوجد ملاحظات' }}</p>
+              </div>
+            </div>
+            @if (meetingReport?.labAnalysisRequest?.notes) {
+              <div class="mt-3 p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-900">
+                <strong><i class="fa-solid fa-note-sticky mr-1 text-amber-600"></i>ملاحظات عامة:</strong> {{ meetingReport.labAnalysisRequest.notes }}
+              </div>
+            }
+            <ng-template #labNotFound>
+              <p class="rpt-empty">الدكتور لم يكتب شيئاً هنا</p>
+            </ng-template>
+          </div>
+          }
+
+          @if(currentSection === 1){
+          <!-- Radiological Examinations -->
+          <div>
+            <h4 class="rpt-h">
+              <span class="rpt-bar"></span> طلب أشعة تشخيصية / Radiological Examinations
+            </h4>
+            <div *ngIf="meetingReport?.radiologicalExaminationRequest?.radiologicalExaminations?.length; else radiologyNotFound" class="rpt-grid">
+              <div *ngFor="let rad of meetingReport.radiologicalExaminationRequest.radiologicalExaminations" class="rpt-item">
+                <h5><i class="fa-solid fa-x-ray text-[#007bbd] mr-1.5"></i>{{ rad.name }}</h5>
+                <p><i class="fa-regular fa-comment-dots mr-1"></i>الملاحظات: {{ rad.notes || rad.position || 'لا يوجد ملاحظات' }}</p>
+              </div>
+            </div>
+            @if (meetingReport?.radiologicalExaminationRequest?.notes) {
+              <div class="mt-3 p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-900">
+                <strong><i class="fa-solid fa-note-sticky mr-1 text-amber-600"></i>ملاحظات عامة:</strong> {{ meetingReport.radiologicalExaminationRequest.notes }}
+              </div>
+            }
+            <ng-template #radiologyNotFound>
+              <p class="rpt-empty">الدكتور لم يكتب شيئاً هنا</p>
+            </ng-template>
+          </div>
+          }
+
+          @if(currentSection === 2){
+          <!-- Prescription Medicines -->
+          <div>
+            <h4 class="rpt-h">
+              <span class="rpt-bar"></span> Rx / روشتة طبية - Medical Prescription
+            </h4>
+            <div *ngIf="meetingReport?.prescription?.medicines?.length; else prescriptionNotFound" class="rpt-grid">
+              <div *ngFor="let med of meetingReport.prescription.medicines" class="rpt-item">
+                <h5><i class="fa-solid fa-pills text-[#007bbd] mr-1.5"></i>{{ med.name }}</h5>
+                <p><i class="fa-solid fa-clock-rotate-left mr-1"></i>التعليمات: {{ med.instructions || med.notes || 'لا يوجد ملاحظات' }}</p>
+              </div>
+            </div>
+            @if (meetingReport?.prescription?.notes) {
+              <div class="mt-3 p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-900">
+                <strong><i class="fa-solid fa-note-sticky mr-1 text-amber-600"></i>ملاحظات عامة:</strong> {{ meetingReport.prescription.notes }}
+              </div>
+            }
+            <ng-template #prescriptionNotFound>
+              <p class="rpt-empty">الدكتور لم يكتب شيئاً هنا</p>
+            </ng-template>
+          </div>
+          }
+        </div>
+
+        <!-- PDF Official Footer & Verification -->
+        <div class="rpt-pdf-footer">
+          <div class="rpt-pdf-footer-content">
+            <div class="rpt-pdf-qr-box">
+              <img src="assets/images/2048px-QR_Code_Model_1_Example 1.png" class="rpt-pdf-qr-img" alt="QR Verification" />
+              <div>
+                <p class="text-xs font-bold text-slate-700 m-0">رمز التوثيق الإلكتروني</p>
+                <p class="text-[10px] text-slate-400 m-0">امسح الكود للتحقق من صحة الوثيقة</p>
+              </div>
+            </div>
+            <div class="rpt-pdf-stamp">
+              <i class="fa-solid fa-circle-check"></i>
+              <div class="rpt-pdf-stamp-text">
+                <span class="rpt-pdf-stamp-title">وثيقة معتمدة وموثقة</span>
+                <span class="rpt-pdf-stamp-sub">صادرة من منصة تلي صحة</span>
+              </div>
+            </div>
+          </div>
+          <p class="rpt-pdf-legal">
+            تعتبر هذه الوثيقة طازجة ومعتمدة صادرة إلكترونياً من منصة تلي صحة لخدمات الرعاية الصحية عن بُعد ولا تتطلب توقيعاً يدوياً. www.teleseha.com
+          </p>
+        </div>
+      </div>
+
+      <!-- Buttons Panel -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
+        <button (click)="downloadPrescription()" [disabled]="isDownloading"
+          class="w-full ts-btn-primary flex items-center justify-center gap-2">
+          <i [class]="isDownloading ? 'fa-solid fa-circle-notch fa-spin' : 'fa-solid fa-file-pdf'"></i>
+          {{ isDownloading ? 'جاري تجهيز الملف…' : 'تحميل PDF' }}
+          @if(!isDownloading){
+            @if(currentSection === 0){ — التحاليل }
+            @if(currentSection === 1){ — الأشعة }
+            @if(currentSection === 2){ — الروشتة }
+          }
+        </button>
+        
+        <button (click)="exitMeeting()" class="w-full bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold transition-all duration-200 shadow-2xs cursor-pointer">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          إنهاء وعودة للرئيسية
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+}
+}
+@if (isValidating) {
+  <div class="flex justify-center items-center h-screen bg-[#001725] text-white">
+    <div class="text-center">
+      <i class="fa-solid fa-circle-notch fa-spin text-5xl mb-4 text-[#007BBD]"></i>
+      <p class="text-lg font-semibold tracking-wide">جاري التحقق من صلاحية الجلسة...</p>
+    </div>
+  </div>
+}
+

@@ -1,0 +1,192 @@
+
+
+
+<!--
+  الروشتة/التحاليل/الأشعة مقفولة لحد ما الطبيب يسجّل التشخيص (نفس القاعدة اللي
+  السيرفر بيطبّقها على إنهاء الكشف). الزرار المقفول ملفوف في .ts-gate عشان الـ
+  tooltip يظهر: الماوس مبيوصلش لزرار disabled فالـ title عليه مكانش هيبان أصلًا.
+-->
+<div class="grid grid-cols-2 gap-3 md:flex md:justify-between md:gap-4 items-center mb-6">
+  <span class="ts-gate w-full" [class.is-blocked]="!hasDiagnosis()" [attr.data-tip]="hasDiagnosis() ? null : blockedReason()">
+    <button (click)="openPopupPrescription()" [disabled]="!hasDiagnosis()" [attr.aria-disabled]="!hasDiagnosis()"
+      class="w-full ts-btn-primary flex items-center justify-center gap-2 py-3 px-2 rounded-xl shadow-xs text-sm font-bold hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+      <i class="fa-solid fa-pills text-lg"></i>
+      <span>كتابة الروشتة</span>
+      @if (!hasDiagnosis()) { <i class="fa-solid fa-lock text-xs opacity-80"></i> }
+    </button>
+  </span>
+
+  <button (click)="openPopupDiagnosis()" class="w-full bg-white border flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-sm font-bold hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-2xs"
+    [class]="hasDiagnosis()
+      ? 'border-slate-200 text-[#007BBD] hover:border-[#007BBD] hover:bg-slate-50'
+      : 'border-[#007BBD] text-[#007BBD] ring-2 ring-[#007BBD]/15 hover:bg-slate-50'">
+    <i class="fa-solid fa-stethoscope text-lg"></i>
+    <span>التشخيص</span>
+  </button>
+
+  <span class="ts-gate w-full" [class.is-blocked]="!hasDiagnosis()" [attr.data-tip]="hasDiagnosis() ? null : blockedReason()">
+    <button (click)="openPopupLabTests()" [disabled]="!hasDiagnosis()" [attr.aria-disabled]="!hasDiagnosis()"
+      class="w-full bg-white border border-slate-200 text-[#007BBD] hover:border-[#007BBD] hover:bg-slate-50 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-sm font-bold hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-2xs">
+      <i class="fa-solid fa-flask-vial text-lg"></i>
+      <span>طلب تحاليل</span>
+      @if (!hasDiagnosis()) { <i class="fa-solid fa-lock text-xs opacity-70"></i> }
+    </button>
+  </span>
+
+  <span class="ts-gate w-full" [class.is-blocked]="!hasDiagnosis()" [attr.data-tip]="hasDiagnosis() ? null : blockedReason()">
+    <button (click)="openPopupRadiology()" [disabled]="!hasDiagnosis()" [attr.aria-disabled]="!hasDiagnosis()"
+      class="w-full bg-white border border-slate-200 text-[#007BBD] hover:border-[#007BBD] hover:bg-slate-50 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-sm font-bold hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-2xs">
+      <i class="fa-solid fa-x-ray text-lg"></i>
+      <span>طلب أشعة</span>
+      @if (!hasDiagnosis()) { <i class="fa-solid fa-lock text-xs opacity-70"></i> }
+    </button>
+  </span>
+
+  <button (click)="openPopupBookFollowUp()" class="w-full bg-white border border-slate-200 text-[#007BBD] hover:border-[#007BBD] hover:bg-slate-50 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-sm font-bold hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shadow-2xs">
+    <i class="fa-solid fa-calendar-check text-lg"></i>
+    <span>حجز متابعة</span>
+  </button>
+</div>
+
+<!-- Prescription -->
+@if (showPopupPrescription) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon prescription">
+        <i class="fa-solid fa-prescription"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>The Prescription</h3>
+        <p>Add medicines for the patient</p>
+      </div>
+      <button class="ts-modal-close" (click)="closePrescription()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <app-add-edit-prescription (closePrescription)="closePrescription()"></app-add-edit-prescription>
+    </div>
+
+  </div>
+</div>
+}
+
+
+<!-- Radiology -->
+@if (showPopupRadiology) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon radiology">
+        <i class="fa-solid fa-x-ray"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Radiology Request</h3>
+        <p>Request imaging examinations</p>
+      </div>
+      <button class="ts-modal-close" (click)="closeRadiology()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <app-add-edit-radiology (closeRadiology)="closeRadiology()"></app-add-edit-radiology>
+    </div>
+
+  </div>
+</div>
+}
+
+
+<!-- Diagnosis -->
+@if (showPopupDiagnosis) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon diagnosis">
+        <i class="fa-solid fa-stethoscope"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Diagnosis</h3>
+        <p>Record the diagnosis for this consultation</p>
+      </div>
+      <button class="ts-modal-close" (click)="closeDiagnosis()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <app-add-edit-diagnosis (closeDiagnosis)="closeDiagnosis()"></app-add-edit-diagnosis>
+    </div>
+
+  </div>
+</div>
+}
+
+
+<!-- Lab Tests -->
+@if (showPopupLabTests) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon labtest">
+        <i class="fa-solid fa-flask-vial"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Lab Tests</h3>
+        <p>Request laboratory analysis</p>
+      </div>
+      <button class="ts-modal-close" (click)="closeLabTest()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <app-add-edit-labtest (closeLab)="closeLabTest()"></app-add-edit-labtest>
+    </div>
+
+  </div>
+</div>
+}
+
+<!-- Book Follow Up -->
+@if (bookFollowUp) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card" style="max-width: 720px;">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon prescription">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Book Follow Up</h3>
+        <p>Schedule a follow-up appointment</p>
+      </div>
+      <button class="ts-modal-close" (click)="closeBookFollowUp()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <app-book-follow-up (closeBookFollowUp)="closeBookFollowUp()"></app-book-follow-up>
+    </div>
+
+  </div>
+</div>
+}

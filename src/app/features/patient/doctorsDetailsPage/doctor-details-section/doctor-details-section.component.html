@@ -1,0 +1,664 @@
+<div class="py-12 bg-slate-50/30 pt-[140px] md:pt-[160px]">
+  <div class="container mx-auto px-4 max-w-5xl">
+
+    @if(isBrowser && data){
+
+    <!-- Profile Header Card -->
+    <div class="ts-card border border-slate-100 p-8 md:p-10 bg-white mb-8">
+      <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+        <!-- Doctor Image -->
+        <div class="relative flex-shrink-0">
+          <img 
+            [src]="data?.imageUrl || 'assets/images/Group 76674.png'" 
+            class="w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44 rounded-3xl object-cover border-4 border-slate-50 shadow-md"
+            loading="lazy" 
+            alt="doctor profile image"
+          />
+          <div class="absolute -bottom-2 -right-2 bg-emerald-500 border-4 border-white w-6 h-6 rounded-full" title="Online"></div>
+        </div>
+
+        <!-- Details -->
+        <div class="text-center md:text-left rtl:md:text-right space-y-4 flex-1">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-center md:justify-start">
+            <h2 class="text-slate-800 text-2xl sm:text-3xl font-extrabold leading-tight">
+              {{ data?.name }}
+            </h2>
+            <div class="flex items-center justify-center gap-1 bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-extrabold w-fit mx-auto md:mx-0">
+              <i class="fa-solid fa-star text-amber-500"></i>
+              <span>{{ data?.rating || 0 }}</span>
+            </div>
+          </div>
+
+          <h4 class="text-slate-600 text-lg font-bold">
+            {{ data?.specialty }}
+          </h4>
+
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 text-slate-400 text-sm font-medium">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+              <span>{{ 'doctorsList.consultations' | translate }}: <strong class="text-slate-600">{{ data?.successfuls || 0 }}</strong></span>
+            </div>
+          </div>
+
+          <!-- Fee Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex flex-col justify-center">
+              <span class="text-slate-400 text-xs font-bold uppercase tracking-wider block">
+                {{ 'doctorsList.consultationFee' | translate }}
+              </span>
+              <span class="text-slate-800 text-xl font-extrabold mt-1">
+                {{ data?.price }} EGP
+              </span>
+            </div>
+            
+            <div class="bg-teal-50/50 border border-teal-100/50 rounded-2xl p-4 flex flex-col justify-center">
+              <span class="text-slate-400 text-xs font-bold uppercase tracking-wider block">
+                {{ 'doctorsList.followUpFee' | translate }}
+              </span>
+              <span class="text-slate-800 text-xl font-extrabold mt-1">
+                {{ data?.followUpPrice }} EGP
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About the Doctor -->
+    <div class="mb-10">
+      <h3 class="text-slate-800 text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-(--primary-color) rounded-full"></span>
+        {{ 'doctorsList.aboutDoctor' | translate }}
+      </h3>
+      <div class="bg-white border border-slate-100 rounded-3xl p-6 md:p-8">
+        <p class="text-slate-600 text-sm sm:text-base leading-relaxed whitespace-pre-line font-medium">
+          {{ data?.doctorProfile?.description }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Information (Address & Schedules) -->
+    <div class="ts-card border border-slate-100 p-6 md:p-8 bg-white mb-10">
+      <h3 class="text-slate-800 text-xl md:text-2xl font-extrabold mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info text-(--primary-color) text-lg sm:text-xl"></i>
+        {{ 'doctorsList.information' | translate }}
+      </h3>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Address -->
+        <div class="lg:col-span-4 space-y-3">
+          <div class="flex items-center gap-2.5 text-(--primary-color) font-bold text-base sm:text-lg">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>{{ 'doctorsList.address' | translate }}</span>
+          </div>
+          <p class="text-slate-600 text-sm sm:text-base leading-relaxed bg-slate-50 border border-slate-100 rounded-2xl p-4 font-semibold">
+            {{ data?.doctorProfile?.address || ('doctorsList.noDetails' | translate) }}
+          </p>
+        </div>
+
+        <!-- Schedule Section -->
+        <div class="lg:col-span-8 space-y-6">
+          <!-- Weekly Schedule -->
+          <div>
+            <div class="flex items-center gap-2.5 text-(--primary-color) font-bold text-base sm:text-lg mb-3">
+              <i class="fa-solid fa-repeat"></i>
+              <span>{{ 'doctorsList.weeklySchedule' | translate }}</span>
+            </div>
+
+            @if(data?.schedules?.length > 0){
+            <div class="grid grid-cols-1 gap-2.5">
+              @for (item of data?.schedules; track $index) {
+              <div class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                <span class="text-slate-700 text-sm sm:text-base font-bold">
+                  {{ item.day }}
+                </span>
+                <span class="text-(--primary-color) text-sm sm:text-base font-extrabold bg-blue-50/50 px-3 py-1 rounded-full border border-blue-100/50">
+                  {{ formatTime(item.startTime) }} - {{ formatTime(item.endTime) }}
+                </span>
+              </div>
+              }
+            </div>
+            } @else {
+            <p class="text-slate-400 text-sm italic py-2">
+              {{ 'doctorsList.noSchedule' | translate }}
+            </p>
+            }
+          </div>
+
+          <!-- One Time Sessions -->
+          <div>
+            <div class="flex items-center gap-2.5 text-(--primary-color) font-bold text-base sm:text-lg mb-3">
+              <i class="fa-solid fa-calendar-check"></i>
+              <span>{{ 'doctorsList.upcomingSessions' | translate }}</span>
+            </div>
+
+            @if(data?.sessions?.length > 0){
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              @for (session of data?.sessions; track session.sessionId) {
+              <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col gap-1">
+                <div class="text-slate-700 text-sm sm:text-base font-bold flex items-center gap-2">
+                  <i class="fa-regular fa-calendar text-xs text-slate-400"></i>
+                  <span>{{ session.date }}</span>
+                </div>
+                <div class="text-(--primary-color) text-xs sm:text-sm font-extrabold flex items-center gap-2">
+                  <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+                  <span>{{ formatTime(session.start) }} - {{ formatTime(session.end) }}</span>
+                </div>
+              </div>
+              }
+            </div>
+            } @else {
+            <p class="text-slate-400 text-sm italic py-2">
+              {{ 'doctorsList.noSchedule' | translate }}
+            </p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qualifications -->
+    <div class="mb-10">
+      <h3 class="text-slate-800 text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-(--primary-color) rounded-full"></span>
+        {{ 'doctorsList.qualifications' | translate }}
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- University -->
+        <div class="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-(--primary-color) flex-shrink-0">
+            <i class="fa-solid fa-university text-lg"></i>
+          </div>
+          <div>
+            <h5 class="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              {{ 'doctorsList.university' | translate }}
+            </h5>
+            <p class="text-slate-700 text-base sm:text-lg font-bold mt-1">
+              {{ data?.doctorProfile?.university || ('doctorsList.noDetails' | translate) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Degree -->
+        <div class="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 flex-shrink-0">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+          </div>
+          <div>
+            <h5 class="text-slate-400 text-xs font-bold uppercase tracking-wider">
+              {{ 'doctorsList.degree' | translate }}
+            </h5>
+            <p class="text-slate-700 text-base sm:text-lg font-bold mt-1">
+              {{ data?.doctorProfile?.qualifications || ('doctorsList.noDetails' | translate) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patient Reviews -->
+    <div class="mb-10">
+      <h3 class="text-slate-800 text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2">
+        <span class="w-1.5 h-6 bg-(--primary-color) rounded-full"></span>
+        {{ 'doctorsList.reviews' | translate }}
+        @if(data?.ratingCount > 0){
+          <span class="text-slate-400 text-sm font-bold">({{ data?.ratingCount }})</span>
+        }
+      </h3>
+
+      @if(data?.reviews?.length > 0){
+        <div class="grid grid-cols-1 gap-4">
+          @for (review of data?.reviews; track $index) {
+            <div class="bg-white border border-slate-100 rounded-3xl p-5 md:p-6">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-blue-50 text-(--primary-color) flex items-center justify-center font-extrabold">
+                    <i class="fa-regular fa-user"></i>
+                  </div>
+                  <div>
+                    <span class="text-slate-700 font-bold text-sm sm:text-base block">
+                      {{ review.patientName || ('doctorsList.anonymousPatient' | translate) }}
+                    </span>
+                    <span class="text-slate-400 text-xs font-medium">
+                      {{ review.createdAt | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-sm font-extrabold">
+                  <i class="fa-solid fa-star text-amber-500 text-xs"></i>
+                  <span>{{ review.rating }}</span>
+                </div>
+              </div>
+
+              @if(review.review){
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-medium mt-2">
+                  {{ review.review }}
+                </p>
+              }
+
+              <div class="flex flex-wrap gap-2 mt-3">
+                @if(review.isFirstAdvantage){
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50/50 border border-blue-100/50 rounded-full text-[11px] font-semibold text-blue-600">
+                    <i class="fa-regular fa-message"></i> {{ 'doctorsList.explainsClearly' | translate }}
+                  </span>
+                }
+                @if(review.isSecondAdvantage){
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50/50 border border-purple-100/50 rounded-full text-[11px] font-semibold text-purple-600">
+                    <i class="fa-regular fa-headphones"></i> {{ 'doctorsList.goodListener' | translate }}
+                  </span>
+                }
+                @if(review.isThirdAdvantage){
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-50/50 border border-teal-100/50 rounded-full text-[11px] font-semibold text-teal-600">
+                    <i class="fa-regular fa-face-smile"></i> {{ 'doctorsList.friendly' | translate }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="bg-white border border-slate-100 rounded-3xl p-8 text-center">
+          <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-xl text-slate-300 mb-3">
+            <i class="fa-regular fa-star"></i>
+          </div>
+          <p class="text-slate-400 text-sm font-medium">
+            {{ 'doctorsList.noReviews' | translate }}
+          </p>
+        </div>
+      }
+    </div>
+
+    <!-- Action Booking Button -->
+    <div class="flex justify-center mt-12">
+      <button
+        (click)="showModal()"
+        class="ts-btn-primary px-16 py-4 text-base sm:text-lg font-bold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+      >
+        <i class="fa-regular fa-calendar-check mr-2 rtl:ml-2"></i>
+        {{ 'doctorsList.booking' | translate }}
+      </button>
+    </div>
+    }
+
+    @else {
+    <div class="flex flex-col items-center justify-center my-20 text-center p-12 bg-white border border-slate-100 rounded-3xl ts-card">
+      <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+        <i class="fa-solid fa-user-md-slash text-3xl"></i>
+      </div>
+      <h3 class="text-slate-700 text-lg sm:text-xl font-bold">
+        {{ 'doctorsList.noDetails' | translate }}
+      </h3>
+    </div>
+    }
+
+  </div>
+</div>
+
+<!-- Booking Modal -->
+@if(showPopup){
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+  <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 text-center w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar relative animate-scale-up border border-slate-100">
+    <!-- Close button -->
+    <button 
+      (click)="bookingCompleted ? closePostBooking() : showPopup = false"
+      class="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-slate-400 hover:text-slate-600 transition-colors w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center cursor-pointer"
+    >
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+
+    <!-- ================= BOOKING SELECTION (Original Flow) ================= -->
+    @if(!bookingCompleted){
+
+    @if(uniqueDays.length > 0){
+    <div class="text-left rtl:text-right mb-6">
+      <h3 class="text-slate-800 text-xl font-extrabold flex items-center gap-2">
+        <i class="fa-solid fa-calendar text-(--primary-color) text-base"></i>
+        {{ 'doctor.selectDate' | translate }}
+      </h3>
+    </div>
+
+    <!-- Date selector timeline -->
+    <div class="mb-8 flex gap-3 overflow-x-auto no-scrollbar py-3 px-1 scroll-smooth">
+      @for (day of uniqueDays; track $index) {
+      <button 
+        (click)="selectDay(day.date)" 
+        [ngClass]="selectedDate === day.date ? 'bg-(--primary-color) text-white shadow-md shadow-blue-500/20' : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'"
+        class="flex-shrink-0 min-w-[100px] border rounded-2xl p-3 text-center cursor-pointer transition-all duration-300"
+      >
+        <h4 
+          [ngClass]="selectedDate === day.date ? 'text-blue-100' : 'text-slate-400'"
+          class="text-xs font-bold tracking-wide uppercase"
+        >
+          {{ getDayName(day.date) }}
+        </h4>
+        <p class="text-lg sm:text-xl font-extrabold mt-1">
+          {{ getDayWithMonth(day.date) }}
+        </p>
+      </button>
+      }
+    </div>
+
+    <!-- Time slots grid -->
+    <div class="text-left rtl:text-right mb-4">
+      <h3 class="text-slate-800 text-xl font-extrabold flex items-center gap-2">
+        <i class="fa-regular fa-clock text-(--primary-color) text-base"></i>
+        {{ 'doctor.selectTime' | translate }}
+      </h3>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      @for (session of getSessionsByDate(); track $index) {
+      <button 
+        (click)="selectSession(session.sessionId)" 
+        [ngClass]="selectedSessionId === session.sessionId ? 'bg-(--primary-color) text-white shadow-md shadow-blue-500/20 border-transparent' : 'bg-blue-50/50 text-slate-700 border-blue-100/50 hover:bg-blue-50/80'"
+        class="border rounded-2xl py-4 px-6 text-center cursor-pointer transition-all duration-300 font-extrabold text-sm sm:text-base flex items-center justify-center gap-2"
+      >
+        <i class="fa-regular fa-clock text-xs opacity-75"></i>
+        <span>{{ formatTime(session.start) }} - {{ formatTime(session.end) }}</span>
+      </button>
+      }
+    </div>
+
+    <!-- Confirm button -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <button 
+        (click)="bookingSession()"
+        class="ts-btn-primary w-full sm:w-auto sm:min-w-[16rem] px-6 py-4 text-base font-bold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer whitespace-nowrap"
+      >
+        <i class="fa-regular fa-calendar-check mr-2 rtl:ml-2"></i>
+        {{ 'doctorsList.booking' | translate }}
+      </button>
+    </div>
+    }
+
+    @if(uniqueDays.length === 0){
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-4 animate-pulse">
+        <i class="fa-regular fa-calendar-times text-2xl"></i>
+      </div>
+      <h3 class="text-slate-700 text-base sm:text-lg font-bold">
+        {{ 'doctorsList.noSchedule' | translate }}
+      </h3>
+      <p class="text-slate-400 text-xs mt-1">
+        This doctor does not have any active availability slots for booking right now.
+      </p>
+    </div>
+    }
+
+    }
+
+    <!-- ================= POST-BOOKING CONTINUATION FLOW ================= -->
+    @if(bookingCompleted && activeBooking){
+
+    <div class="space-y-6">
+      <!-- Success Animation -->
+      <div class="flex flex-col items-center gap-3 pt-2">
+        <div class="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center animate-bounce-once">
+          <i class="fa-solid fa-circle-check text-emerald-500 text-4xl"></i>
+        </div>
+        <h3 class="text-slate-800 text-xl sm:text-2xl font-extrabold">
+          {{ 'doctorsList.bookingSuccess' | translate }}
+        </h3>
+        <p class="text-slate-400 text-sm font-medium max-w-md">
+          {{ 'doctorsList.bookingSuccessDesc' | translate }}
+        </p>
+      </div>
+
+      <!-- Booking Details Card -->
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+        <h4 class="text-slate-600 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-regular fa-calendar-check text-(--primary-color)"></i>
+          {{ 'doctorsList.bookingDetails' | translate }}
+        </h4>
+
+        <div class="flex items-center gap-4">
+          <img 
+            [src]="activeBooking?.doctorCard?.imageUrl || data?.imageUrl || 'assets/images/Group 76674.png'" 
+            class="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-sm"
+            loading="lazy" 
+            alt="doctor"
+          />
+          <div class="text-left rtl:text-right">
+            <h5 class="text-slate-800 text-base font-extrabold">
+              {{ activeBooking?.doctorCard?.name || data?.name }}
+            </h5>
+            <p class="text-slate-500 text-sm font-medium">
+              {{ activeBooking?.doctorCard?.specialty || data?.specialty }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-slate-200/50 rounded-full text-xs font-semibold text-slate-600">
+            <i class="fa-regular fa-calendar text-(--primary-color)"></i>
+            <span>{{ activeBooking?.session?.date }}</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-slate-200/50 rounded-full text-xs font-semibold text-slate-600">
+            <i class="fa-regular fa-clock text-(--primary-color)"></i>
+            <span>{{ activeBooking?.session?.start ? formatTime(activeBooking.session.start) : '' }} - {{ activeBooking?.session?.end ? formatTime(activeBooking.session.end) : '' }}</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-600 rounded-full text-xs font-extrabold border border-blue-100/50">
+            {{ activeBooking?.doctorCard?.price || data?.price }} EGP
+          </span>
+        </div>
+      </div>
+
+      <!-- Next Step Label -->
+      <div class="text-left rtl:text-right">
+        <h4 class="text-slate-700 text-sm font-bold flex items-center gap-2">
+          <span class="w-1 h-4 bg-(--primary-color) rounded-full"></span>
+          {{ 'doctorsList.nextStep' | translate }}
+        </h4>
+      </div>
+
+      <!-- Action Button (same styling as bookings page) -->
+      <div class="flex flex-col items-center gap-3">
+        <button 
+          [ngClass]="getPostBookingButtonColor()" 
+          [disabled]="isPostBookingDisabled() || bookingLoading"
+          (click)="handlePostBookingAction()"
+          class="w-full sm:w-auto sm:min-w-[16rem] px-6 py-4 rounded-full text-base font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+        >
+          @if(bookingLoading){
+            <i class="fa-solid fa-spinner animate-spin mr-2 rtl:ml-2 rtl:mr-0"></i>
+          }
+          {{ getPostBookingButtonText() | translate }}
+        </button>
+
+        <!-- Continue Later link -->
+        <button 
+          (click)="closePostBooking()"
+          class="text-slate-400 hover:text-slate-600 text-sm font-semibold transition-colors cursor-pointer flex items-center gap-1.5"
+        >
+          <i class="fa-regular fa-clock text-xs"></i>
+          {{ 'doctorsList.continueLater' | translate }}
+        </button>
+      </div>
+    </div>
+
+    }
+
+  </div>
+</div>
+}
+
+<!-- Chat AI Triage Modal (Post-Booking) -->
+@if(showPostBookingChatAI){
+<div class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
+  <div 
+    (click)="$event.stopPropagation()" 
+    class="bg-white rounded-3xl shadow-2xl relative w-full max-w-lg p-6 md:p-8 border border-slate-100 animate-scale-up"
+  >
+    <!-- Close button -->
+    <button 
+      (click)="closePostBookingChatAI()" 
+      class="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-slate-400 hover:text-slate-600 transition-colors w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center cursor-pointer"
+    >
+      <i class="fa-solid fa-xmark text-base"></i>
+    </button>
+
+    <!-- Title -->
+    <div class="text-center mb-6">
+      <h3 class="text-slate-800 text-lg sm:text-xl font-extrabold flex items-center justify-center gap-2">
+        <i class="fa-solid fa-robot text-(--primary-color) text-xl animate-pulse"></i>
+        {{ 'patientBooking.conditionTitle' | translate }}
+      </h3>
+    </div>
+
+    <!-- ================= FIRST MESSAGE ================= -->
+    @if(!complaintStarted){
+    <!-- AI Bubble -->
+    <div class="flex items-start gap-3.5 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-(--primary-color) flex-shrink-0">
+        <i class="fa-solid fa-robot text-lg"></i>
+      </div>
+      <div class="bg-blue-500 text-white rounded-2xl rounded-tl-none py-3 px-4 shadow-sm max-w-[80%]">
+        <p class="text-sm font-semibold leading-relaxed">
+          {{ 'patientBooking.complainingPrompt' | translate }}
+        </p>
+      </div>
+    </div>
+
+    <!-- User Input -->
+    <div class="relative flex items-center mt-4">
+      <input 
+        [(ngModel)]="firstComplaintText" 
+        type="text" 
+        placeholder="{{ 'patientBooking.complaintInputPlaceholder' | translate }}"
+        class="ts-input pl-4 pr-12 py-3.5 !rounded-2xl"
+        (keyup.enter)="startComplaint()"
+      />
+      <button 
+        (click)="startComplaint()" 
+        class="absolute right-3 rtl:left-3 rtl:right-auto text-(--primary-color) hover:text-[#005F8A] transition-colors p-2 cursor-pointer"
+      >
+        <i class="fa-solid fa-paper-plane text-base"></i>
+      </button>
+    </div>
+    }
+
+    <!-- ================= AI QUESTIONS (ACTIVE CONVERSATION) ================= -->
+    @if(complaintStarted){
+    <div class="space-y-6">
+      <!-- AI Bubble -->
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-(--primary-color) flex-shrink-0">
+          <i class="fa-solid fa-robot text-lg"></i>
+        </div>
+        <div class="bg-blue-500 text-white rounded-2xl rounded-tl-none py-3 px-4 shadow-sm max-w-[80%]">
+          <p class="text-sm font-semibold leading-relaxed">
+            {{ aiQuestion?.content }}
+          </p>
+        </div>
+      </div>
+
+      <!-- MCQ Question Input -->
+      @if(aiQuestion?.contentType === 'McqQuestion'){
+      <div class="space-y-2.5 flex flex-col items-end w-full">
+        @for(choice of aiQuestion.choicesList; track choice){
+        <button 
+          (click)="toggleChoice(choice)" 
+          [ngClass]="selectedChoices.includes(choice) ? 'border-(--primary-color) bg-blue-50/50 text-(--primary-color)' : 'border-slate-100 hover:bg-slate-50 text-slate-700 bg-white'"
+          class="w-full sm:w-[85%] flex justify-between items-center border rounded-2xl px-4 py-3 cursor-pointer text-sm font-bold transition-all duration-200 text-left rtl:text-right"
+        >
+          <span>{{ choice }}</span>
+          <div 
+            class="w-5 h-5 rounded border border-slate-300 flex items-center justify-center transition-all"
+            [ngClass]="selectedChoices.includes(choice) ? 'bg-(--primary-color) border-transparent text-white' : 'bg-white'"
+          >
+            <i class="fa-solid fa-check text-[10px]" *ngIf="selectedChoices.includes(choice)"></i>
+          </div>
+        </button>
+        }
+      </div>
+      }
+
+      <!-- Yes/No Question Input -->
+      @if(aiQuestion?.contentType === 'yesOrNo'){
+      <div class="space-y-2.5 flex flex-col items-end w-full">
+        <button 
+          (click)="yesOrNoAnswer = true" 
+          [ngClass]="yesOrNoAnswer === true ? 'border-(--primary-color) bg-blue-50/50 text-(--primary-color)' : 'border-slate-100 hover:bg-slate-50 text-slate-700 bg-white'"
+          class="w-full sm:w-[60%] flex justify-between items-center border rounded-2xl px-4 py-3 cursor-pointer text-sm font-bold transition-all duration-200"
+        >
+          <span>{{ 'patientBooking.yes' | translate }}</span>
+          <div 
+            class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center"
+            [ngClass]="yesOrNoAnswer === true ? 'border-(--primary-color) bg-(--primary-color) text-white' : 'bg-white'"
+          >
+            <div class="w-2 h-2 rounded-full bg-white" *ngIf="yesOrNoAnswer === true"></div>
+          </div>
+        </button>
+
+        <button 
+          (click)="yesOrNoAnswer = false" 
+          [ngClass]="yesOrNoAnswer === false ? 'border-(--primary-color) bg-blue-50/50 text-(--primary-color)' : 'border-slate-100 hover:bg-slate-50 text-slate-700 bg-white'"
+          class="w-full sm:w-[60%] flex justify-between items-center border rounded-2xl px-4 py-3 cursor-pointer text-sm font-bold transition-all duration-200"
+        >
+          <span>{{ 'patientBooking.no' | translate }}</span>
+          <div 
+            class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center"
+            [ngClass]="yesOrNoAnswer === false ? 'border-(--primary-color) bg-(--primary-color) text-white' : 'bg-white'"
+          >
+            <div class="w-2 h-2 rounded-full bg-white" *ngIf="yesOrNoAnswer === false"></div>
+          </div>
+        </button>
+      </div>
+      }
+
+      <!-- Free Text Question Input -->
+      @if(aiQuestion?.contentType === 'question'){
+      <div class="relative flex items-center mt-4 w-full">
+        <input 
+          [(ngModel)]="textAnswer" 
+          type="text" 
+          placeholder="{{ 'patientBooking.answerInputPlaceholder' | translate }}"
+          class="ts-input pl-4 pr-12 py-3.5 !rounded-2xl"
+          (keyup.enter)="sendAnswer()"
+        />
+        <button 
+          (click)="sendAnswer()" 
+          class="absolute right-3 rtl:left-3 rtl:right-auto text-(--primary-color) hover:text-[#005F8A] transition-colors p-2 cursor-pointer"
+        >
+          <i class="fa-solid fa-paper-plane text-base"></i>
+        </button>
+      </div>
+      }
+
+      <!-- Diagnosis Report Final Bubble -->
+      @if(aiQuestion?.contentType === 'report'){
+      <div class="mt-6 p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
+        <div class="w-12 h-12 rounded-full bg-emerald-100/55 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+          <i class="fa-solid fa-circle-check text-xl"></i>
+        </div>
+        <p class="text-emerald-800 text-sm font-extrabold leading-relaxed">
+          {{ aiQuestion.content }}
+        </p>
+      </div>
+      }
+
+      <!-- Submit CTA (for Multi-choice / Yes-No modes) -->
+      @if(aiQuestion?.contentType !== 'report' && aiQuestion?.contentType !== 'question'){
+      <div class="flex justify-center pt-2">
+        <button 
+          [disabled]="loading" 
+          (click)="sendAnswer()" 
+          class="ts-btn-primary w-full sm:w-auto sm:min-w-[16rem] px-6 py-3.5 font-bold shadow-md shadow-blue-500/10 hover:shadow-lg disabled:opacity-50 transition-all cursor-pointer whitespace-nowrap"
+        >
+          <span *ngIf="loading">
+            <i class="fa-solid fa-spinner animate-spin mr-2 rtl:ml-2"></i>
+            {{ 'doctor.loading' | translate }}
+          </span>
+          <span *ngIf="!loading">
+            {{ 'reception.send' | translate }}
+          </span>
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+  </div>
+</div>
+}

@@ -1,0 +1,80 @@
+<div>
+  <form [formGroup]="prescriptionForm" (ngSubmit)="submit()">
+
+    <div formArrayName="medicines">
+
+      @for (item of medicines.controls; track item; let i = $index) {
+
+      <div class="ts-item-card" [formGroupName]="i">
+
+        <!-- Label -->
+        <div class="ts-item-label">
+          <span class="ts-item-number">{{ $index + 1 }}</span>
+          <span class="ts-item-label-text">Drug {{ $index + 1 }}</span>
+        </div>
+
+        <!-- Select -->
+        <div class="ts-select-wrapper relative">
+          <p-select
+            class="custom-select w-full"
+            formControlName="id"
+            [options]="drugs"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            (onFilter)="onSearch($event)"
+            (onChange)="onDrugSelect($event, $index)"
+            placeholder="Select the drug">
+          </p-select>
+          <!-- Small inline search indicator — the drug lookup must not raise the page spinner -->
+          @if (isSearchingDrugs) {
+            <span class="absolute top-1/2 -translate-y-1/2 ltr:right-10 rtl:left-10 text-slate-400 pointer-events-none">
+              <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+            </span>
+          }
+        </div>
+
+        <!-- Notes / Dosage for this drug -->
+        <div class="mt-2.5">
+          <input type="text" formControlName="instructions" (input)="onMedicineNoteInput($index)" placeholder="Dosage or notes for this drug (optional)"
+            class="ts-input text-xs h-9 px-3 py-1 bg-white border border-slate-200 rounded-lg w-full focus:border-[#007BBD] focus:outline-none">
+        </div>
+
+        <!-- Remove Button -->
+        @if (medicines.length > 1) {
+        <button type="button" (click)="removeMedicine($index)" class="ts-item-remove">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        }
+
+      </div>
+
+      }
+
+    </div>
+
+    <!-- Add -->
+    <button type="button" (click)="addMedicine()" class="ts-add-btn">
+      <span class="ts-add-icon">+</span>
+      Add another medicine
+    </button>
+
+    <!-- Notes -->
+    <div class="ts-notes-section">
+      <label class="ts-notes-label">
+        General Notes (optional)
+      </label>
+      <input type="text" formControlName="notes" placeholder="Enter general notes or additional instructions"
+        class="ts-input">
+    </div>
+
+    <!-- Submit -->
+    <div class="ts-submit-section">
+      <button type="submit" class="ts-btn-primary w-full">
+        <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>
+        Send Prescription
+      </button>
+    </div>
+
+  </form>
+</div>

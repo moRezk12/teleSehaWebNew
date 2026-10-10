@@ -1,0 +1,243 @@
+<div class="space-y-6">
+  @for (item of data; track item.id) {
+  <div class="border border-slate-100 p-6 rounded-3xl bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all duration-300">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      
+      <!-- Doctor Info -->
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1">
+        <div class="relative flex-shrink-0">
+          @if(!item.doctor?.imageUrl){
+          <img 
+            class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-white shadow-sm"
+            src="assets/images/Group 76674.png" 
+            loading="lazy" 
+            alt="default doctor img"
+          />
+          } @else {
+          <img 
+            class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-white shadow-sm"
+            src="{{ item.doctor.imageUrl }}" 
+            loading="lazy" 
+            alt="doctor img"
+          />
+          }
+        </div>
+
+        <div class="text-center sm:text-left rtl:sm:text-right space-y-2 flex-1">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
+            <h3 class="text-slate-800 text-lg font-extrabold">
+              {{ item.doctor.name }}
+            </h3>
+            <div class="flex items-center justify-center gap-1 bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full text-xs font-extrabold w-fit mx-auto sm:mx-0">
+              <i class="fa-solid fa-star text-amber-500"></i>
+              <span>{{ item.doctor.ratingValue }}</span>
+            </div>
+          </div>
+
+          <div class="text-slate-500 text-sm font-semibold">
+            {{ item.doctor.specialty }}
+          </div>
+
+          <p class="text-slate-400 text-xs sm:text-sm font-medium">
+            {{ 'doctorsList.consultations' | translate }}: <span class="font-bold text-slate-600">{{ item.doctor.successfuls }}</span>
+          </p>
+
+          <p class="text-(--primary-color) text-xs sm:text-sm font-bold flex items-center gap-1.5 justify-center sm:justify-start bg-blue-50/50 w-fit px-3 py-1 rounded-full border border-blue-100/50">
+            <i class="fa-regular fa-calendar-check text-xs"></i>
+            <span>{{ 'doctor.selectDate' | translate }}: {{ item.meeting.start | date: 'dd/MM/yyyy' }}</span>
+          </p>
+
+          @if (uploadedLinks(item).length > 0) {
+            <p class="text-emerald-600 text-xs sm:text-sm font-bold flex items-center gap-1.5 justify-center sm:justify-start bg-emerald-50 w-fit px-3 py-1 rounded-full border border-emerald-100">
+              <i class="fa-solid fa-circle-check text-xs"></i>
+              <span>{{ 'reports.sentResults' | translate }}: {{ uploadedLinks(item).length }}</span>
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="w-full md:w-auto flex flex-col sm:flex-row md:flex-col gap-3">
+        <!-- Upload -->
+        <button 
+          (click)="showPopupUpload(item.id)"
+          class="ts-btn-primary w-full md:w-auto md:min-w-[12rem] px-6 py-3 text-sm font-bold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-300 cursor-pointer whitespace-nowrap"
+        >
+          <i class="fa-solid fa-upload mr-2 rtl:ml-2"></i>
+          {{ 'reports.uploadBtn' | translate }}
+        </button>
+
+        <!-- View -->
+        <button 
+          (click)="getById(item)"
+          class="ts-btn-secondary w-full md:w-auto md:min-w-[12rem] px-6 py-3 text-sm font-bold hover:bg-slate-50 transition-all duration-300 cursor-pointer whitespace-nowrap"
+        >
+          <i class="fa-regular fa-eye mr-2 rtl:ml-2"></i>
+          {{ 'reports.viewDocument' | translate }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+  } @empty {
+  <div class="flex flex-col items-center justify-center py-12 text-center">
+    <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+      <i class="fa-solid fa-x-ray text-2xl"></i>
+    </div>
+    <h3 class="text-slate-700 text-base sm:text-lg font-bold">
+      {{ 'reports.noDocuments' | translate }}
+    </h3>
+  </div>
+  }
+</div>
+
+<!-- Upload Popup Modal Wrapper -->
+@if(isPopupUpload){
+<div class="ts-modal-overlay">
+  <div class="w-full max-w-xl">
+    <app-popup-upload
+      (close)="closePopupUpload()"
+      (uploaded)="getAllRadiology()"
+      title="radiology"
+      [selectedId]="selectedId"
+    >
+    </app-popup-upload>
+  </div>
+</div>
+}
+
+<!-- Radiology Details Preview Modal -->
+@if (showPopupPrescription) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card" style="max-width: 680px;">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon radiology">
+        <i class="fa-solid fa-x-ray"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>{{ 'reports.radiology' | translate }}</h3>
+        <p>RAD-{{ radiology?.id }}</p>
+      </div>
+      <button class="ts-modal-close" (click)="showPopupPrescription = false">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <div id="radiologyContent" class="rpt-doc">
+
+        <!-- PDF Platform Branding Header -->
+        <div class="rpt-pdf-header">
+          <div class="rpt-pdf-brand">
+            <img src="assets/images/Group 76373.svg" class="rpt-pdf-logo" alt="teleSEHA Logo" />
+            <div class="rpt-pdf-brand-text">
+              <h2 class="rpt-pdf-brand-title">منصة تلي صحة الطبية</h2>
+              <span class="rpt-pdf-brand-sub">teleSEHA Telemedicine Platform</span>
+            </div>
+          </div>
+          <div class="rpt-pdf-meta">
+            <span class="rpt-pdf-badge"><i class="fa-solid fa-x-ray"></i> طلب أشعة تشخيصية معتمد</span>
+            <p class="rpt-pdf-id">RAD-{{ radiology?.id || '—' }}</p>
+            @if (radiology?.meeting?.start) {
+            <span class="rpt-pdf-date">{{ radiology.meeting.start | date: 'dd/MM/yyyy - hh:mm a' }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="rpt-pdf-divider"></div>
+
+        <!-- Doctor & patient -->
+        <div class="rpt-parties">
+          <div>
+            <span class="rpt-label">الطبيب المعالج / Doctor</span>
+            <div class="rpt-doc-name">
+              <span>{{ radiology?.doctor?.name || '—' }}</span>
+              @if (radiology?.doctor?.ratingValue) {
+              <span class="rpt-star"><i class="fa-solid fa-star"></i> {{ radiology.doctor.ratingValue }}</span>
+              }
+            </div>
+            <p class="rpt-muted">{{ radiology?.doctor?.specialty || 'تخصص عام' }}</p>
+          </div>
+          <div class="rpt-patient">
+            <span class="rpt-label">{{ 'reports.patientName' | translate }} / Patient</span>
+            <p class="rpt-strong">{{ patients?.name || 'اسم المريض غير متاح' }}</p>
+            @if (radiology?.meeting?.start) {
+            <p class="rpt-muted">تاريخ الطلب: {{ radiology.meeting.start | date: 'dd/MM/yyyy' }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Requested scans -->
+        <div class="rpt-section">
+          <h4 class="rpt-h"><span class="rpt-bar"></span> {{ 'reports.radiology' | translate }} / Required Scans</h4>
+          <div class="rpt-grid">
+            @for (rad of radiology?.radiologicalExaminations; track rad.id) {
+            <div class="rpt-item">
+              <h5><i class="fa-solid fa-x-ray text-[#007bbd] mr-1.5"></i>{{ rad.name }}</h5>
+              @if (rad.position) { <p><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>الوضعية/الملاحظات: {{ rad.position }}</p> }
+            </div>
+            } @empty {
+            <p class="rpt-empty">{{ 'doctor.none' | translate }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Uploaded results -->
+        @if (uploadedLinks(radiology).length > 0) {
+        <div class="rpt-section" style="border-top: 1px solid #eef2f7;">
+          <h4 class="rpt-h"><span class="rpt-bar green"></span> {{ 'reports.sentResults' | translate }}</h4>
+          <div class="rpt-results">
+            @for (link of uploadedLinks(radiology); track link) {
+            @if (isImage(link)) {
+            <div class="rpt-thumb" (click)="openFile(link)">
+              <img [src]="link" loading="lazy" alt="uploaded result" />
+            </div>
+            } @else {
+            <div class="rpt-file" (click)="openFile(link)">
+              <i class="fa-solid fa-file"></i>
+              <span>{{ getFileName(link) }}</span>
+            </div>
+            }
+            }
+          </div>
+        </div>
+        }
+
+        <!-- PDF Official Footer & Verification -->
+        <div class="rpt-pdf-footer">
+          <div class="rpt-pdf-footer-content">
+            <div class="rpt-pdf-qr-box">
+              <img src="assets/images/2048px-QR_Code_Model_1_Example 1.png" class="rpt-pdf-qr-img" alt="QR Verification" />
+              <div>
+                <p class="text-xs font-bold text-slate-700 m-0">رمز التوثيق الإلكتروني</p>
+                <p class="text-[10px] text-slate-400 m-0">امسح الكود للتحقق من صحة طلب الأشعة</p>
+              </div>
+            </div>
+            <div class="rpt-pdf-stamp">
+              <i class="fa-solid fa-circle-check"></i>
+              <div class="rpt-pdf-stamp-text">
+                <span class="rpt-pdf-stamp-title">وثيقة معتمدة وموثقة</span>
+                <span class="rpt-pdf-stamp-sub">صادرة من منصة تلي صحة</span>
+              </div>
+            </div>
+          </div>
+          <p class="rpt-pdf-legal">
+            تعتبر هذه الوثيقة طازجة ومعتمدة صادرة إلكترونياً من منصة تلي صحة لخدمات الرعاية الصحية عن بُعد لإجراء الفحوصات والأشعة المطلوبة. www.teleseha.com
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Download -->
+      <button (click)="downloadPDF()" [disabled]="isDownloading" class="ts-btn-primary w-full rpt-download">
+        <i [class]="isDownloading ? 'fa-solid fa-circle-notch fa-spin' : 'fa-solid fa-file-pdf'"></i>
+        {{ isDownloading ? 'جاري تجهيز الملف…' : ('doctorsList.downloadRadiology' | translate) }}
+      </button>
+    </div>
+
+  </div>
+</div>
+}

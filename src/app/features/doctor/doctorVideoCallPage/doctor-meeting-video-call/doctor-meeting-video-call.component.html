@@ -1,0 +1,161 @@
+<div class="relative h-full">
+
+  <!-- Floating Pull Tab for Reports -->
+  <div (click)="openModal()" class="ts-reports-pull-tab">
+    <i class="fa-solid fa-clipboard-list"></i>
+    <span>Medical History</span>
+  </div>
+
+  <div class="absolute top-[20px] right-[20px] bg-black rounded-full
+          w-[60px] h-[60px] md:hidden flex justify-center items-center z-[99]" (click)="openWhatsApp()">
+    <i class="fa-brands fa-whatsapp text-green-600 text-[35px] cursor-pointer"></i>
+  </div>
+
+  <div class="w-full h-full flex flex-col min-h-0">
+    <div class="bg-white rounded-2xl p-5 w-full h-full flex flex-col min-h-0 shadow-sm border border-slate-100">
+      
+      <!-- Video Area -->
+      <div class="relative rounded-2xl overflow-hidden bg-slate-950 flex-1 min-h-0 shadow-inner flex flex-col justify-between">
+        
+        <!-- Remote Video Stream -->
+        <div id="remote-video" class="w-full h-full absolute inset-0 flex items-center justify-center z-0">
+          @if (showWaitingForOtherParticipant()) {
+          <div class="flex flex-col items-center gap-3 text-slate-400">
+            <div class="w-12 h-12 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin"></div>
+            <span class="text-sm font-medium">Waiting for participant...</span>
+          </div>
+          }
+        </div>
+
+        <!-- Floating Badges Overlay -->
+        <div class="absolute top-4 left-4 z-10 flex gap-2">
+          @if (callTimerLabel()) {
+          <div class="ts-video-header-badge">
+            <i class="fa-regular fa-clock text-blue-400"></i>
+            <span>{{ callTimerLabel() }}</span>
+          </div>
+          }
+          <div class="ts-video-header-badge">
+            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span class="text-xs uppercase tracking-wider">Live</span>
+          </div>
+        </div>
+
+        <!-- Local Video (Self View) -->
+        <div id="local-video"
+          class="absolute bottom-4 right-4 w-40 h-28 bg-slate-900 rounded-xl border-2 border-white/90 shadow-2xl overflow-hidden transition-all duration-300 hover:scale-105 z-20">
+        </div>
+
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="flex justify-center items-center gap-5 py-4 flex-shrink-0">
+        <button type="button" (click)="toggleMic()"
+          [class]="micMuted ? 'ts-video-btn-control muted' : 'ts-video-btn-control active'"
+          title="Toggle mic">
+          <i [class]="micMuted ? 'fa-solid fa-microphone-slash' : 'fa-solid fa-microphone'"></i>
+        </button>
+        <span class="ts-gate" [class.is-blocked]="!hasDiagnosis()"
+          [attr.data-tip]="hasDiagnosis() ? null : blockedReason()">
+          <button type="button" (click)="endCall()" [disabled]="isClosing || !hasDiagnosis()"
+            [attr.aria-disabled]="isClosing || !hasDiagnosis()"
+            class="ts-video-btn-control end-call"
+            [attr.title]="hasDiagnosis() ? 'End call' : blockedReason()">
+            <i [class]="isClosing
+              ? 'fa-solid fa-circle-notch fa-spin'
+              : (hasDiagnosis() ? 'fa-solid fa-phone-slash' : 'fa-solid fa-lock')"></i>
+          </button>
+        </span>
+        <button type="button" (click)="toggleCamera()"
+          [class]="cameraOff ? 'ts-video-btn-control muted' : 'ts-video-btn-control active'"
+          title="Toggle camera">
+          <i [class]="cameraOff ? 'fa-solid fa-video-slash' : 'fa-solid fa-video'"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Reports Modal (Symptoms & Medical History) -->
+@if (showPopupReports) {
+<div class="ts-modal-overlay">
+  <div class="ts-modal-card" style="max-width: 650px;">
+
+    <!-- Header -->
+    <div class="ts-modal-header">
+      <div class="ts-modal-header-icon prescription">
+        <i class="fa-solid fa-clipboard-list"></i>
+      </div>
+      <div class="ts-modal-header-text">
+        <h3>Medical Record</h3>
+        <p>Patient symptoms and clinical history</p>
+      </div>
+      <button class="ts-modal-close" (click)="showPopupReports = false">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="ts-modal-body">
+      <!-- Symptoms -->
+      <div class="mb-6">
+        <h4 class="text-[#1e293b] text-base font-bold mb-3 flex items-center gap-2">
+          <span class="w-1.5 h-4 bg-[#007BBD] rounded-full"></span>
+          Symptoms
+        </h4>
+        <div class="space-y-2">
+          <div class="flex items-start gap-2.5 p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-exclamation text-amber-500"></i></span>
+            <span class="text-slate-600 text-sm font-medium">Inability to form two-word sentences (older than 24 months)</span>
+          </div>
+          <div class="flex items-start gap-2.5 p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+            <span class="text-slate-400 mt-1"><i class="fa-solid fa-circle-exclamation text-amber-500"></i></span>
+            <span class="text-slate-600 text-sm font-medium">Inability to form two-word sentences (older than 24 months)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical History -->
+      <div>
+        <h4 class="text-[#1e293b] text-base font-bold mb-3 flex items-center gap-2">
+          <span class="w-1.5 h-4 bg-[#007BBD] rounded-full"></span>
+          Medical History
+        </h4>
+        
+        <div class="space-y-4">
+          @for (section of medicalHistory; track section.sectionId) {
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-4">
+            <h5 class="text-slate-800 font-bold text-sm mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-folder-open text-[#007BBD]"></i>
+              {{ section.sectionName }}
+            </h5>
+
+            <div class="space-y-3 pl-4 border-l-2 border-slate-200">
+              @for (sub of section.subSections; track sub.subSectionId) {
+              <div>
+                <h6 class="text-slate-700 font-semibold text-xs mb-1.5">{{ sub.subSectionName }}</h6>
+                <div class="flex flex-wrap gap-1.5">
+                  @for (item of sub.items; track item.itemName) {
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-white border border-slate-200 text-slate-600">
+                    {{ item.itemName }}
+                  </span>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+          } @empty {
+          <div class="text-center py-6 text-slate-400 text-sm">
+            No medical history records found.
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+}
