@@ -131,9 +131,9 @@ export class AssistantSettingComponent {
 
   getAssitantData() {
     this.doctorAuthService.getAssistants().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         // console.log(res);
-        this.assistantSetting = res;
+        this.assistantSetting = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log(err);
@@ -158,17 +158,60 @@ export class AssistantSettingComponent {
             this.isAddingAssistant = false;
             this.editingId = null;
           },
+          error: (err) => {
+            const apiError = err?.error;
+            if (apiError?.message) {
+              this.toastr.error(apiError.message);
+              return;
+            }
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toastr.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
+              Object.entries(apiError.errors).forEach(([key, messages]: [string, any]) => {
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => this.toastr.error(`${key} : ${msg}`));
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
+              });
+            }
+          },
         });
     } else {
       this.doctorAuthService
         .createAssistant(this.assistantForm.value)
         .subscribe({
-          next: (res) => {
+          next: () => {
             this.toastr.success('Added Successfully');
             this.getAssitantData();
-            this.assistantSetting.push(res);
             this.assistantForm.reset();
             this.isAddingAssistant = false;
+          },
+          error: (err) => {
+            const apiError = err?.error;
+            if (apiError?.message) {
+              this.toastr.error(apiError.message);
+              return;
+            }
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toastr.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
+              Object.entries(apiError.errors).forEach(([key, messages]: [string, any]) => {
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => this.toastr.error(`${key} : ${msg}`));
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
+              });
+            }
           },
         });
     }
@@ -178,7 +221,7 @@ export class AssistantSettingComponent {
     this.isAddingAssistant = true;
     this.editingId = id;
 
-    const assistant = this.assistantSetting.find((a) => a.id === id);
+    const assistant = this.assistantSetting.find((a) => a.id === id || a.assistantId === id);
 
     if (assistant) {
       this.assistantForm.patchValue({
@@ -191,11 +234,14 @@ export class AssistantSettingComponent {
   deleteAssistant(id: any) {
     this.doctorAuthService.deleteAssistant(id).subscribe({
       next: (res) => {
-        // console.log(res);
+        this.toastr.success('Deleted Successfully');
         this.getAssitantData();
       },
       error: (err) => {
-        console.log(err);
+        const apiError = err?.error;
+        if (apiError?.message) {
+          this.toastr.error(apiError.message);
+        }
       },
     });
   }

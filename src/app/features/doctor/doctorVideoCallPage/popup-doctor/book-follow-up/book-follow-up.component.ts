@@ -56,13 +56,14 @@ export class BookFollowUpComponent implements OnInit {
     this.uniqueDays = [];
     if (!this.doctorId) return;
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
+      next: (res: any) => {
         console.log(res);
 
-        this.sessions = res;
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
 
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values(),
+          new Map(list.map((s: any) => [s.date, s])).values(),
         );
 
         if (this.uniqueDays.length) {

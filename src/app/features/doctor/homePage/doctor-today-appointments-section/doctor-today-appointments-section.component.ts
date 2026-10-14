@@ -29,9 +29,9 @@ export class DoctorTodayAppointmentsSectionComponent {
   getTodayAppointments() {
     if (this.doctorId) {
       this.doctorService.gethomeAppointments(this.doctorId).subscribe({
-        next: (res) => {
-          this.data = res.toDayAppointmentsCount;
-          // console.log('Today Appointments:', res);
+        next: (res: any) => {
+          const stats = res?.data ?? res;
+          this.data = stats?.toDayAppointmentsCount ?? stats;
         },
         error: (err) => {
           console.error('Error fetching today appointments:', err);

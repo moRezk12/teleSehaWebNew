@@ -120,7 +120,7 @@ export class PatientAllDoctorsSectionComponent implements OnInit {
       )
       .subscribe({
         next: (res: any) => {
-          const newDoctors = res.data || res;
+          const newDoctors = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
 
           if (from || LastId) {
             this.doctors = [...this.doctors, ...newDoctors];

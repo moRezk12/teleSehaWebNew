@@ -72,9 +72,10 @@ export class DoctorFollowUpSectionComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           console.log(res);
-          this.data = res;
+          const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          this.data = list;
 
-          this.allAppointments = res.map((session: any) => ({
+          this.allAppointments = list.map((session: any) => ({
             sessionId: session.sessionId,
             date: session.date,
             sessionStart: session.start,
@@ -126,11 +127,12 @@ export class DoctorFollowUpSectionComponent implements OnInit {
     this.currentReportMeetingId = id;
     // withReports=true: البوب أب بيعرض النتائج المرفوعة — من غيرها بترجع فاضية.
     this.doctorService.getReports(id, true).subscribe({
-      next: (res) => {
+      next: (res: any) => {
+        const data = res?.data ?? res;
         this.reports = [];
 
         // ===== LAB =====
-        const lab = res.labAnalysisRequest?.result ?? [];
+        const lab = data?.labAnalysisRequest?.result ?? [];
 
         if (lab.length) {
           this.reports.push({
@@ -141,7 +143,7 @@ export class DoctorFollowUpSectionComponent implements OnInit {
 
         // ===== RADIOLOGY =====
         const radiology =
-          res.radiologicalExaminationRequest?.radiologicalExaminationResult ??
+          data?.radiologicalExaminationRequest?.radiologicalExaminationResult ??
           [];
 
         if (radiology.length) {
@@ -161,12 +163,22 @@ export class DoctorFollowUpSectionComponent implements OnInit {
           return;
         }
 
-        if (apiError?.errors) {
+        if (Array.isArray(apiError?.errors)) {
+          apiError.errors.forEach((errItem: any) => {
+            const msg = errItem?.message || errItem;
+            const field = errItem?.field ? `${errItem.field}: ` : '';
+            this.toaster.error(`${field}${msg}`);
+          });
+        } else if (apiError?.errors) {
           Object.entries(apiError.errors).forEach(
             ([key, messages]: [string, any]) => {
-              messages.forEach((msg: string) => {
-                this.toaster.error(`${key} : ${msg}`);
-              });
+              if (Array.isArray(messages)) {
+                messages.forEach((msg: string) => {
+                  this.toaster.error(`${key} : ${msg}`);
+                });
+              } else {
+                this.toaster.error(`${key} : ${messages}`);
+              }
             },
           );
         }
@@ -260,20 +272,19 @@ export class DoctorFollowUpSectionComponent implements OnInit {
   openMeeting(appointmentId: number) {
     this.doctorService.openAppointment(appointmentId).subscribe({
       next: (res: any) => {
-        // كل القيم defensive: أي نقص في الرد ميمنعش الدخول للمكالمة —
-        // زرار "بدأ" لازم يدخل الطبيب على طول من غير ما يحتاج يدوس "انضمام" بعدها.
-        this.selectedMeetingId = res.id;
-        this.localStorageService.set('meetingId', res.id);
-        this.localStorageService.set('channelName', res.channelName ?? '');
-        this.localStorageService.set('checkUpId', res.checkUp?.id ?? res.checkUpId);
-        this.localStorageService.set('patientId', res.checkUp?.patientId ?? res.patient?.patientId);
+        const data = res?.data ?? res;
+        this.selectedMeetingId = data.id;
+        this.localStorageService.set('meetingId', data.id);
+        this.localStorageService.set('channelName', data.channelName ?? '');
+        this.localStorageService.set('checkUpId', data.checkUp?.id ?? data.checkUpId);
+        this.localStorageService.set('patientId', data.checkUp?.patientId ?? data.patient?.patientId);
         this.localStorageService.set(
           'medicalHistory',
-          JSON.stringify(res.patient?.sections || []),
+          JSON.stringify(data.patient?.sections || []),
         );
-        this.localStorageService.set('meetingToken', res.providerToken ?? '');
-        this.localStorageService.set('agoraDetails', JSON.stringify(res));
-        this.router.navigate([`/doctor/videoCall/${res.id}`]);
+        this.localStorageService.set('meetingToken', data.providerToken ?? '');
+        this.localStorageService.set('agoraDetails', JSON.stringify(data));
+        this.router.navigate([`/doctor/videoCall/${data.id}`]);
       },
       error: (err) => {
         console.error('Error starting video meeting:', err);
@@ -304,11 +315,12 @@ export class DoctorFollowUpSectionComponent implements OnInit {
     this.uniqueDays = [];
     if (!this.doctorId) return;
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
-        this.sessions = res;
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
 
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values(),
+          new Map(list.map((s: any) => [s.date, s])).values(),
         );
 
         if (this.uniqueDays.length) {
@@ -370,12 +382,22 @@ export class DoctorFollowUpSectionComponent implements OnInit {
             return;
           }
 
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toaster.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toaster.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toaster.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toaster.error(`${key} : ${messages}`);
+                }
               },
             );
           }

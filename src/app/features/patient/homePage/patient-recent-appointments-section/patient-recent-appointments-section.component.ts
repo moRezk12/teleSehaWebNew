@@ -52,10 +52,10 @@ export class PatientRecentAppointmentsSectionComponent implements OnInit {
     this.recentAppointmentService
       .appointmentCheckComming(Number(this.patientId))
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           console.log(" ------------------");
           console.log(res);
-          this.data = res;
+          this.data = res?.data ?? res;
         },
       });
   }

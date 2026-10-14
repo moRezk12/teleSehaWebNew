@@ -83,9 +83,9 @@ export class CertificatesInfoComponent implements OnInit {
 
   loadDoctorCertificates() {
     this.doctorAuthService.getDoctorCertificateById(this.doctorId).subscribe({
-      next: (res) => {
-        if (res && res.data) {
-          const data = res.data;
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        if (data && (data.nationalIdFrontUrl || data.bachelorCerificateUrl || res?.data)) {
 
           this.basicInfoForm.get('NationalIdFrontUrl')?.clearValidators();
           this.basicInfoForm.get('NationalIdBackUrl')?.clearValidators();

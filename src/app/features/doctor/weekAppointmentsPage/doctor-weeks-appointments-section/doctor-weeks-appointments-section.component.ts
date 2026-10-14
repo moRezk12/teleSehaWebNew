@@ -45,9 +45,10 @@ export class DoctorWeeksAppointmentsSectionComponent implements OnInit {
   data: any;
   loadTodaysAppointments() {
     this.doctorService.getAppointmentsWeek(Number(this.doctorId)).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log('week:', res);
-        this.data = res?.dayAppointments;
+        const data = res?.data ?? res;
+        this.data = data?.dayAppointments ?? data;
         console.log(this.data);
       },
       error: (err) => {
@@ -116,11 +117,12 @@ export class DoctorWeeksAppointmentsSectionComponent implements OnInit {
     this.uniqueDays = [];
     if (!this.doctorId) return;
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
-        this.sessions = res;
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
 
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values(),
+          new Map(list.map((s: any) => [s.date, s])).values(),
         );
 
         if (this.uniqueDays.length) {

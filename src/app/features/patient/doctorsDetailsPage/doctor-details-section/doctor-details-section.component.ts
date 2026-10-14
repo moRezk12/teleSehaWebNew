@@ -100,9 +100,9 @@ export class DoctorDetailsSectionComponent implements OnInit {
   loadDoctorDetails() {
     if (this.doctorId) {
       this.doctorService.getDoctorProfile(this.doctorId).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           console.log(res);
-          this.data = res.data;
+          this.data = res?.data ?? res;
           const schedules = this.data?.schedules || [];
           const map = new Map<
             string,
@@ -138,12 +138,13 @@ export class DoctorDetailsSectionComponent implements OnInit {
     this.sessions = [];
     this.uniqueDays = [];
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
-        this.sessions = res;
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
 
         // 👇 أيام بدون تكرار
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values(),
+          new Map(list.map((s: any) => [s.date, s])).values(),
         );
 
         // 👇 اختيار أول يوم تلقائي
@@ -214,12 +215,13 @@ export class DoctorDetailsSectionComponent implements OnInit {
             (s) => s.sessionId === this.selectedSessionId,
           );
 
+          const bookingData = res?.data ?? res;
           this.activeBooking = {
-            id: res?.id ?? null,
-            status: res?.status ?? PatientAppointmentStatus.Created,
-            session: res?.session ?? selectedSession,
-            sessionId: res?.sessionId ?? selectedSession?.sessionId ?? this.selectedSessionId,
-            doctorCard: res?.doctorCard ?? this.data,
+            id: bookingData?.id ?? null,
+            status: bookingData?.status ?? PatientAppointmentStatus.Created,
+            session: bookingData?.session ?? selectedSession,
+            sessionId: bookingData?.sessionId ?? selectedSession?.sessionId ?? this.selectedSessionId,
+            doctorCard: bookingData?.doctorCard ?? this.data,
           };
           this.bookingCompleted = true;
         },
@@ -231,12 +233,22 @@ export class DoctorDetailsSectionComponent implements OnInit {
             return;
           }
 
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toastr.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toastr.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toastr.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
               },
             );
           }
@@ -254,19 +266,20 @@ export class DoctorDetailsSectionComponent implements OnInit {
   private tryEnrichBookingFromApi(knownId: number | null) {
     if (!this.patinetId) return;
     this.recentAppointmentService.appointmentComming(this.patinetId).subscribe({
-      next: (res: any[]) => {
-        if (!Array.isArray(res) || res.length === 0) return;
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        if (list.length === 0) return;
 
         let match: any = null;
 
         // If we have the ID, find by ID.
         if (knownId) {
-          match = res.find((a: any) => a.id === knownId);
+          match = list.find((a: any) => a.id === knownId);
         }
 
         // Otherwise pick the most recent appointment for this doctor/session.
         if (!match) {
-          match = res.find(
+          match = list.find(
             (a: any) =>
               a.session?.sessionId === this.selectedSessionId ||
               a.doctorCard?.doctorId === this.doctorId,
@@ -275,7 +288,7 @@ export class DoctorDetailsSectionComponent implements OnInit {
 
         // Last resort: just take the first one.
         if (!match) {
-          match = res[0];
+          match = list[0];
         }
 
         if (match) {
@@ -298,12 +311,11 @@ export class DoctorDetailsSectionComponent implements OnInit {
   refreshBookingStatus() {
     if (!this.patinetId || !this.activeBooking) return;
     this.recentAppointmentService.appointmentComming(this.patinetId).subscribe({
-      next: (res: any[]) => {
-        if (Array.isArray(res)) {
-          const found = res.find((a: any) => a.id === this.activeBooking.id);
-          if (found) {
-            this.activeBooking = found;
-          }
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        const found = list.find((a: any) => a.id === this.activeBooking.id);
+        if (found) {
+          this.activeBooking = found;
         }
       },
     });
@@ -395,12 +407,22 @@ export class DoctorDetailsSectionComponent implements OnInit {
               this.toastr.error(apiError.message);
               return;
             }
-            if (apiError?.errors) {
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toastr.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
               Object.entries(apiError.errors).forEach(
                 ([key, messages]: [string, any]) => {
-                  messages.forEach((msg: string) => {
-                    this.toastr.error(`${key} : ${msg}`);
-                  });
+                  if (Array.isArray(messages)) {
+                    messages.forEach((msg: string) => {
+                      this.toastr.error(`${key} : ${msg}`);
+                    });
+                  } else {
+                    this.toastr.error(`${key} : ${messages}`);
+                  }
                 },
               );
             }
@@ -451,15 +473,17 @@ export class DoctorDetailsSectionComponent implements OnInit {
         this.selectedAppointmentId,
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.loading = false;
-          if (!res || !res.bodyValue) {
+          const data = res?.data ?? res;
+          const bodyValue = data?.bodyValue;
+          if (!data || !bodyValue) {
             this.finishComplaint();
             return;
           }
           this.complaintStarted = true;
-          this.complaintId = res.patientMedicalComplaintId;
-          this.aiQuestion = res.bodyValue;
+          this.complaintId = data.patientMedicalComplaintId ?? res?.patientMedicalComplaintId;
+          this.aiQuestion = bodyValue;
           this.resetAnswers();
         },
         error: (err) => {
@@ -517,13 +541,15 @@ export class DoctorDetailsSectionComponent implements OnInit {
     }
 
     this.patientChatAi.patientComplaint(answer, this.complaintId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.loading = false;
-        if (!res || !res.bodyValue) {
+        const data = res?.data ?? res;
+        const bodyValue = data?.bodyValue;
+        if (!data || !bodyValue) {
           this.finishComplaint();
           return;
         }
-        this.aiQuestion = res.bodyValue;
+        this.aiQuestion = bodyValue;
         this.resetAnswers();
       },
       error: (err) => {

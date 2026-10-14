@@ -81,10 +81,10 @@ export class DoctorRegisterStep1Component implements OnInit {
   loadExistingData() {
     this.isLoading = true;
     this.doctorAuthService.getDoctorBasicInfo(this.doctorId).subscribe({
-      next: (res) => {
-        if (res && res.data) {
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        if (data && (data.name || data.specialtyId || res?.data)) {
           this.isEditMode = true;
-          const data = res.data;
           
           this.basicInfoForm.patchValue({
             Name: data.name || '',
@@ -193,11 +193,15 @@ export class DoctorRegisterStep1Component implements OnInit {
 
     if (this.isEditMode && this.doctorId) {
       this.doctorAuthService.updateProfiel(this.doctorId, formData).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isLoading = false;
-          this.globalUserStateService.hydrateNextStep(res.nextStep);
-          if (res.data?.imageUrl) {
-             this.doctorRegistrationStateService.setDoctorImage(res.data.imageUrl);
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+          if (nextStep) {
+            this.globalUserStateService.hydrateNextStep(nextStep);
+          }
+          const imageUrl = res?.data?.imageUrl ?? res?.imageUrl;
+          if (imageUrl) {
+             this.doctorRegistrationStateService.setDoctorImage(imageUrl);
           }
           this.toastr.success('Profile updated successfully');
           this.route.navigate(['doctor/auth/register/createProfile'], { replaceUrl: true });
@@ -208,11 +212,20 @@ export class DoctorRegisterStep1Component implements OnInit {
       });
     } else {
       this.doctorAuthService.basicInfo(formData).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isLoading = false;
-          this.globalUserStateService.hydrateNextStep(res.nextStep);
-          this.doctorRegistrationStateService.setDoctorId(res.data.doctorId);
-          this.doctorRegistrationStateService.setDoctorImage(res.data.Image);
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+          if (nextStep) {
+            this.globalUserStateService.hydrateNextStep(nextStep);
+          }
+          const docId = res?.data?.doctorId ?? res?.doctorId;
+          if (docId) {
+            this.doctorRegistrationStateService.setDoctorId(docId);
+          }
+          const img = res?.data?.Image ?? res?.data?.imageUrl ?? res?.Image ?? res?.imageUrl;
+          if (img) {
+            this.doctorRegistrationStateService.setDoctorImage(img);
+          }
           this.route.navigate(['doctor/auth/register/createProfile'], { replaceUrl: true });
         },
         error: () => {

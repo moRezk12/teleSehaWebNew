@@ -4,6 +4,7 @@ import { SKIP_GLOBAL_ERROR_HANDLING } from '../../../core/interceptor/global-han
 import { SKIP_GLOBAL_LOADING } from '../../../core/interceptor/loading.interceptor';
 import { Observable } from 'rxjs';
 import { Environment } from '../../../../environments/environment.development';
+import { IApiResponse } from '../../../core/models/api-response';
 import { INextStep } from '../../../core/models/nextStepEnum';
 import { DeviceKeyService } from '../../../shared/services/device-key.service';
 
@@ -16,203 +17,203 @@ export class DoctorAuthService {
     readonly deviceKeyService: DeviceKeyService,
   ) {}
 
-  login(data: any): Observable<any> {
+  login(data: any): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
     const payload = { ...data, deviceKey };
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/authentication/doctor/login`,
       payload,
     );
   }
 
-  loginMobile(mobile: any): Observable<INextStep> {
-    return this.http.post<INextStep>(
+  loginMobile(mobile: any): Observable<IApiResponse<any> & INextStep> {
+    return this.http.post<IApiResponse<any> & INextStep>(
       `${Environment.apiUrl}/api/authentication/doctor/is-mobile-registered`,
       { mobile },
     );
   }
 
-  resendOtp(mobile: string): Observable<INextStep> {
-    return this.http.post<INextStep>(
+  resendOtp(mobile: string): Observable<IApiResponse<any> & INextStep> {
+    return this.http.post<IApiResponse<any> & INextStep>(
       `${Environment.apiUrl}/api/authentication/doctor/resend-otp`,
       { mobile },
     );
   }
 
-  forgorPassword(mobile: any): Observable<any> {
-    return this.http.post<any>(
+  forgorPassword(mobile: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/authentication/doctor/forgot-password`,
       { mobile },
     );
   }
 
-  otpConfirm(data: any): Observable<any> {
+  otpConfirm(data: any): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
     const payload = { ...data, deviceKey };
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/authentication/doctor/otp-confirm`,
       payload,
     );
   }
 
-  createPassword(data: any): Observable<any> {
+  createPassword(data: any): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
     const payload = { ...data, deviceKey };
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/authentication/doctor/create-password`,
       payload,
     );
   }
 
-  basicInfo(data: FormData): Observable<any> {
+  basicInfo(data: FormData): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
 
     data.append('deviceKey', deviceKey);
 
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor`,
       data,
     );
   }
 
-  getDoctorBasicInfo(doctorId: any): Observable<any> {
-    return this.http.get<any>(
+  getDoctorBasicInfo(doctorId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/${doctorId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  updateProfiel(doctorId: any, data: any): Observable<any> {
-    return this.http.put<any>(
+  updateProfiel(doctorId: any, data: any): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/${doctorId}`,
       data,
     );
   }
 
-  doctorProfile(data: FormData): Observable<any> {
+  doctorProfile(data: FormData): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
 
     data.append('deviceKey', deviceKey);
 
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-profile`,
       data,
     );
   }
 
-  getDoctorProfileById(doctorId: any): Observable<any> {
-    return this.http.get<any>(
+  getDoctorProfileById(doctorId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-profile/${doctorId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  updateDoctorProfile(doctorId: any, data: FormData): Observable<any> {
+  updateDoctorProfile(doctorId: any, data: FormData): Observable<IApiResponse<any>> {
      const deviceKey = this.deviceKeyService.getDeviceKey();
      if (!data.has('deviceKey')) data.append('deviceKey', deviceKey);
-    return this.http.put<any>(
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-profile/${doctorId}`,
       data,
     );
   }
 
-  doctorCertificate(data: FormData): Observable<any> {
+  doctorCertificate(data: FormData): Observable<IApiResponse<any>> {
     const deviceKey = this.deviceKeyService.getDeviceKey();
 
     data.append('deviceKey', deviceKey);
-    return this.http.post<any>(
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-certificate`,
       data,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  getDoctorCertificateById(doctorId: any): Observable<any> {
-    return this.http.get<any>(
+  getDoctorCertificateById(doctorId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-certificate/${doctorId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  updateDoctorCertificate(doctorId: any, data: FormData): Observable<any> {
+  updateDoctorCertificate(doctorId: any, data: FormData): Observable<IApiResponse<any>> {
       const deviceKey = this.deviceKeyService.getDeviceKey();
      if (!data.has('deviceKey')) data.append('deviceKey', deviceKey);
-    return this.http.put<any>(
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-certificate/${doctorId}`,
       data,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  getDoctorDataList(): Observable<any> {
-    return this.http.get<any>(
+  getDoctorDataList(): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/shared-data-lists/universities`,
     );
   }
-  getDoctorJopTitle(): Observable<any> {
-    return this.http.get<any>(
+  getDoctorJopTitle(): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/shared-data-lists/doctor-job-titles`,
     );
   }
 
   // Recurring Appointment
-  getDoctorSchedule(doctorId: any): Observable<any> {
-    return this.http.get<any>(
+  getDoctorSchedule(doctorId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-schedule/${doctorId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  createDoctorSchedule(data: any): Observable<any> {
-    return this.http.post<any>(
+  createDoctorSchedule(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-schedule`,
       data,
     );
   }
 
-  updateDoctorSchedule(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updateDoctorSchedule(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-schedule/${id}`,
       data,
     );
   }
 
-  deleteDoctorSchedule(id: any): Observable<any> {
-    return this.http.delete<any>(
+  deleteDoctorSchedule(id: any): Observable<IApiResponse<any>> {
+    return this.http.delete<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-schedule/${id}`,
     );
   }
 
   // Non Recurring Appointment
-  getDoctorSession(doctorId: any): Observable<any> {
-    return this.http.get<any>(
+  getDoctorSession(doctorId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/session/editable/${doctorId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
-  createDoctorSession(data: any) {
-    return this.http.post<any>(
+  createDoctorSession(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/session`,
       data,
     );
   }
 
-  updateDoctorSession(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updateDoctorSession(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/session/${id}`,
       data,
     );
   }
 
-  deleteDoctorSession(id: any): Observable<any> {
-    return this.http.delete<any>(
+  deleteDoctorSession(id: any): Observable<IApiResponse<any>> {
+    return this.http.delete<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/session/${id}`,
     );
   }
 
   // Get Deugs List
-  getDrugs(search?: string): Observable<any> {
+  getDrugs(search?: string): Observable<IApiResponse<any>> {
     let params = new HttpParams();
 
     if (search && search.trim() !== '') {
@@ -221,35 +222,35 @@ export class DoctorAuthService {
 
     // بحث لحظي أثناء كتابة الروشتة: السبينر العام كان بيغطي الصفحة مع كل حرف
     // ويطيّر التركيز من خانة البحث — الكومبوننت بيعرض مؤشر صغير بداله.
-    return this.http.get<any>(`${Environment.apiUrl}/api/doctor-app/drug`, {
+    return this.http.get<IApiResponse<any>>(`${Environment.apiUrl}/api/doctor-app/drug`, {
       params,
       context: new HttpContext().set(SKIP_GLOBAL_LOADING, true),
     });
   }
 
   // Send Prescription
-  sendPrescription(data: any): Observable<any> {
-    return this.http.post<any>(
+  sendPrescription(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/prescription`,
       data,
     );
   }
 
-  getPrescriptionById(prescriptionId: any): Observable<any> {
-    return this.http.get<any>(
+  getPrescriptionById(prescriptionId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/prescription/${prescriptionId}`,
     );
   }
 
-  updatePrescription(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updatePrescription(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/prescription/${id}`,
       data,
     );
   }
 
   // Get Radiology List
-  getRadiology(search: string): Observable<any> {
+  getRadiology(search: string): Observable<IApiResponse<any>> {
     let params = new HttpParams();
 
     if (search && search.trim() !== '') {
@@ -257,34 +258,34 @@ export class DoctorAuthService {
     }
 
     // نفس قاعدة بحث الأدوية: بحث لحظي من غير سبينر يغطي الصفحة.
-    return this.http.get<any>(
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/radiological-examination`,
       { params, context: new HttpContext().set(SKIP_GLOBAL_LOADING, true) },
     );
   }
 
-  sendRadiology(data: any): Observable<any> {
-    return this.http.post<any>(
+  sendRadiology(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/radiological-examination-request`,
       data,
     );
   }
 
-  getRadiologyById(radiologyId: any): Observable<any> {
-    return this.http.get<any>(
+  getRadiologyById(radiologyId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/radiological-examination-request/${radiologyId}`,
     );
   }
 
-  updateRadiology(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updateRadiology(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/radiological-examination-request/${id}`,
       data,
     );
   }
 
   // Get Lab List
-  getLabTest(search: string): Observable<any> {
+  getLabTest(search: string): Observable<IApiResponse<any>> {
     let params = new HttpParams();
 
     if (search && search.trim() !== '') {
@@ -292,34 +293,34 @@ export class DoctorAuthService {
     }
 
     // نفس قاعدة بحث الأدوية: بحث لحظي من غير سبينر يغطي الصفحة.
-    return this.http.get<any>(
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/lab-analysis`,
       { params, context: new HttpContext().set(SKIP_GLOBAL_LOADING, true) },
     );
   }
 
-  sendLab(data: any): Observable<any> {
-    return this.http.post<any>(
+  sendLab(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/lab-analysis-request`,
       data,
     );
   }
 
-  getLabById(labId: any): Observable<any> {
-    return this.http.get<any>(
+  getLabById(labId: any): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/lab-analysis-request/${labId}`,
     );
   }
 
-  updateLab(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updateLab(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/lab-analysis-request/${id}`,
       data,
     );
   }
 
   // Get Diagnoses List
-  getDiagnoses(search: string): Observable<any> {
+  getDiagnoses(search: string): Observable<IApiResponse<any>> {
     let params = new HttpParams();
 
     if (search && search.trim() !== '') {
@@ -327,53 +328,53 @@ export class DoctorAuthService {
     }
 
     // نفس قاعدة بحث الأدوية: بحث لحظي من غير سبينر يغطي الصفحة.
-    return this.http.get<any>(`${Environment.apiUrl}/api/doctor-app/diagnoses`, {
+    return this.http.get<IApiResponse<any>>(`${Environment.apiUrl}/api/doctor-app/diagnoses`, {
       params,
       context: new HttpContext().set(SKIP_GLOBAL_LOADING, true),
     });
   }
 
   // التشخيص متخزن على الميتينج نفسه كقائمة أسماء — الـ POST بيستبدل القائمة كلها.
-  sendDiagnoses(meetingId: number, data: any): Observable<any> {
-    return this.http.post<any>(
+  sendDiagnoses(meetingId: number, data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/diagnoses/${meetingId}`,
       data,
     );
   }
 
   // Get Assistants
-  getAssistants(): Observable<any> {
-    return this.http.get<any>(
+  getAssistants(): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/assistant`,
     );
   }
 
   // Create Assistant
-  createAssistant(data: any): Observable<any> {
-    return this.http.post<any>(
+  createAssistant(data: any): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/assistant`,
       data,
     );
   }
 
   // update Assistant
-  updateAssistant(data: any, id: number): Observable<any> {
-    return this.http.put<any>(
+  updateAssistant(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/assistant/${id}`,
       data,
     );
   }
 
   // delete Assistant
-  deleteAssistant(id: any): Observable<any> {
-    return this.http.put<any>(
+  deleteAssistant(id: any): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/remove-assistant/${id}`,
       { isDeleted: true },
     );
   }
 
-  bookingFollowup(data: any, id: number): Observable<any> {
-    return this.http.post<any>(
+  bookingFollowup(data: any, id: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/book-follow-up/${id}`,
       data,
     );

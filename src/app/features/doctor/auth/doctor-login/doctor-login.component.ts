@@ -102,10 +102,11 @@ export class DoctorLoginComponent implements AfterViewInit {
     this.doctorAuthService.loginMobile(formatted).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        this.globalUserStateService.hydrateNextStep(res.nextStep);
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        this.globalUserStateService.hydrateNextStep(nextStep);
         this.authProcessStateService.setMobile(formatted);
 
-        switch (res.nextStep) {
+        switch (nextStep) {
           case INextStepEnum.OtpConfirm:
             this.toaster.success('OTP Sent Successfully');
             this.route.navigate(['doctor/auth/verify-otp'], { replaceUrl: true });
@@ -120,7 +121,8 @@ export class DoctorLoginComponent implements AfterViewInit {
               this.doctorAuthService.resendOtp(formatted).subscribe({
                 next: (resendRes: any) => {
                   this.isLoading = false;
-                  this.globalUserStateService.hydrateNextStep(resendRes.nextStep);
+                  const resendNextStep = resendRes?.meta?.nextStep ?? resendRes?.nextStep;
+                  this.globalUserStateService.hydrateNextStep(resendNextStep);
                   this.toaster.success('OTP Resent Successfully');
                   this.route.navigate(['doctor/auth/verify-otp'], { replaceUrl: true });
                 },
@@ -136,7 +138,7 @@ export class DoctorLoginComponent implements AfterViewInit {
             this.route.navigate(['doctor/home'], { replaceUrl: true });
             break;
           default:
-            this.globalUserStateService.hydrateNextStep(res.nextStep);
+            this.globalUserStateService.hydrateNextStep(nextStep);
             break;
         }
       },

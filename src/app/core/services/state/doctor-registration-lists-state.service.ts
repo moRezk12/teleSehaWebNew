@@ -49,7 +49,7 @@ export class DoctorRegistrationListsStateService {
           'Master': 'Master, MS, M.Sc., MPH',
           'Doctorate': 'Doctorate, PhD, MD'
         };
-        const resDegrees = results.degrees;
+        const resDegrees = results.degrees?.data ?? results.degrees;
         let mappedDegrees: any[] = [];
         if (resDegrees && Array.isArray(resDegrees.ScientificDegree)) {
           mappedDegrees = resDegrees.ScientificDegree.map((val: string) => ({
@@ -71,7 +71,8 @@ export class DoctorRegistrationListsStateService {
         this._scientificDegrees.set(mappedDegrees);
 
         // Job Titles
-        const jobs = (results.jobs || []).map((item: any) => ({
+        const rawJobs = results.jobs?.data ?? results.jobs ?? [];
+        const jobs = (Array.isArray(rawJobs) ? rawJobs : []).map((item: any) => ({
           ...item,
           titleAr: item.titleEn,
           titleEn: item.titleAr
@@ -79,10 +80,12 @@ export class DoctorRegistrationListsStateService {
         this._jobTitles.set(jobs);
 
         // Countries
-        this._countries.set(results.infoLists?.countries || []);
+        const infoLists = results.infoLists?.data ?? results.infoLists;
+        this._countries.set(infoLists?.countries || []);
 
         // Universities
-        this._universities.set(results.doctorDataList || []);
+        const docData = results.doctorDataList?.data ?? results.doctorDataList;
+        this._universities.set(Array.isArray(docData) ? docData : []);
       })
     );
   }

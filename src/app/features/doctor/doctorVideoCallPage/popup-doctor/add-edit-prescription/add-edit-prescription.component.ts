@@ -53,7 +53,8 @@ export class AddEditPrescriptionComponent implements OnInit {
   private prefillFromMeeting(): void {
     this.doctorsService.getReports(this.meetingId, true).subscribe({
       next: (res: any) => {
-        const prescription = res?.prescription;
+        const data = res?.data ?? res;
+        const prescription = data?.prescription;
         if (!prescription) return;
 
         this.prescriptionForm.patchValue({
@@ -174,11 +175,11 @@ export class AddEditPrescriptionComponent implements OnInit {
         switchMap((search) => this.DoctorAuthService.getDrugs(search)),
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isSearchingDrugs = false;
           // استبدال القائمة كان بيمسح عرض الأدوية المختارة بالفعل في باقي الصفوف
           // (p-select ميعرفش يعرض قيمة مش موجودة في options) — فبنرجّعهم للقائمة.
-          this.drugs = res;
+          this.drugs = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           this.ensureDrugsIncludeMedicines(this.medicines.value ?? []);
         },
         error: () => {
@@ -189,7 +190,7 @@ export class AddEditPrescriptionComponent implements OnInit {
 
   loadDrugs() {
     this.DoctorAuthService.getDrugs().subscribe((res: any) => {
-      this.drugs = res;
+      this.drugs = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       // بعد ما القايمة تجهز نسترجع روشتة الميتينج الحالي (لو موجودة) للتعديل.
       this.prefillFromMeeting();
     });

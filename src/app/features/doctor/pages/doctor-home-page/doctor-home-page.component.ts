@@ -116,7 +116,8 @@ export class DoctorHomePageComponent implements OnInit {
     if (!this.doctorId) return;
     this.doctorService.getDoctorProfile(this.doctorId).subscribe({
       next: (res: any) => {
-        const img = res.data?.doctorProfile?.image || res.data?.image || res.doctorProfile?.image;
+        const data = res?.data ?? res;
+        const img = data?.doctorProfile?.image || data?.image || res?.doctorProfile?.image;
         if (img) {
           this.doctorImage = img;
           this.localStorageService.set('doctorImage', img);
@@ -129,11 +130,12 @@ export class DoctorHomePageComponent implements OnInit {
   loadDashboardStats() {
     if (!this.doctorId) return;
     this.doctorService.gethomeAppointments(this.doctorId).subscribe({
-      next: (res) => {
-        this.todayCount = res.toDayAppointmentsCount || 0;
-        this.weekCount = res.weekAppointmentsCount || 0;
-        this.followUpsCount = res.followUpsCount || 0;
-        this.finishedCount = res.finishedAppointments || 0;
+      next: (res: any) => {
+        const stats = res?.data ?? res;
+        this.todayCount = stats?.toDayAppointmentsCount || 0;
+        this.weekCount = stats?.weekAppointmentsCount || 0;
+        this.followUpsCount = stats?.followUpsCount || 0;
+        this.finishedCount = stats?.finishedAppointments || 0;
       },
       error: (err) => {
         console.error('Error loading home dashboard stats:', err);
@@ -148,8 +150,9 @@ export class DoctorHomePageComponent implements OnInit {
     // "completed today" section below it. The backend strips finished appointments by
     // default, which left that section permanently empty.
     this.doctorService.getAppointmentsToday(this.doctorId, true).subscribe({
-      next: (res: any[]) => {
-        this.allAppointments = res.map((session) => ({
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.allAppointments = list.map((session: any) => ({
           sessionId: session.sessionId,
           sessionStart: session.start,
           appointments: session.appointments || [],
@@ -207,21 +210,20 @@ export class DoctorHomePageComponent implements OnInit {
   openMeeting(appointmentId: number) {
     this.doctorService.openAppointment(appointmentId).subscribe({
       next: (res: any) => {
-        // كل القيم defensive: أي نقص في الرد ميمنعش الدخول للمكالمة —
-        // زرار "بدأ" لازم يدخل الطبيب على طول من غير ما يحتاج يدوس "انضمام" بعدها.
-        this.localStorageService.set('meetingId', res.id);
-        this.localStorageService.set('channelName', res.channelName ?? '');
-        this.localStorageService.set('checkUpId', res.checkUp?.id ?? res.checkUpId);
-        this.localStorageService.set('patientId', res.checkUp?.patientId ?? res.patient?.patientId);
+        const data = res?.data ?? res;
+        this.localStorageService.set('meetingId', data.id);
+        this.localStorageService.set('channelName', data.channelName ?? '');
+        this.localStorageService.set('checkUpId', data.checkUp?.id ?? data.checkUpId);
+        this.localStorageService.set('patientId', data.checkUp?.patientId ?? data.patient?.patientId);
         this.localStorageService.set(
           'medicalHistory',
-          JSON.stringify(res.patient?.sections || [])
+          JSON.stringify(data.patient?.sections || [])
         );
-        this.localStorageService.set('meetingToken', res.providerToken ?? '');
-        this.localStorageService.set('agoraDetails', JSON.stringify(res));
+        this.localStorageService.set('meetingToken', data.providerToken ?? '');
+        this.localStorageService.set('agoraDetails', JSON.stringify(data));
 
         // Navigate to meeting/video call room
-        this.router.navigate([`/doctor/videoCall/${res.id}`]);
+        this.router.navigate([`/doctor/videoCall/${data.id}`]);
       },
       error: (err) => {
         console.error('Error starting video meeting:', err);
@@ -276,10 +278,11 @@ export class DoctorHomePageComponent implements OnInit {
     this.uniqueDays = [];
     if (!this.doctorId) return;
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
-        this.sessions = res;
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values()
+          new Map(list.map((s: any) => [s.date, s])).values()
         );
         if (this.uniqueDays.length) {
           this.selectDay(this.uniqueDays[0].date);
@@ -332,12 +335,22 @@ export class DoctorHomePageComponent implements OnInit {
           const apiError = err?.error;
           if (apiError?.message) {
             this.toaster.error(apiError.message);
+          } else if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toaster.error(`${field}${msg}`);
+            });
           } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toaster.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toaster.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toaster.error(`${key} : ${messages}`);
+                }
               }
             );
           } else {

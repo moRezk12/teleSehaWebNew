@@ -28,9 +28,9 @@ export class DoctorWeeklyAppointmentsSectionComponent {
   getAppointmentsWeek() {
     if (this.doctorId) {
       this.doctorService.gethomeAppointments(this.doctorId).subscribe({
-        next: (res) => {
-          this.data = res.weekAppointmentsCount;
-          // console.log('Weekly Appointments:', res);
+        next: (res: any) => {
+          const stats = res?.data ?? res;
+          this.data = stats?.weekAppointmentsCount ?? stats;
         },
         error: (err) => {
           console.error('Error fetching weekly appointments:', err);

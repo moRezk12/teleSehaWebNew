@@ -88,10 +88,10 @@ export class DoctorRegisterStep3Component {
 
   loadExistingData() {
     this.doctorAuthService.getDoctorCertificateById(this.doctorId).subscribe({
-      next: (res) => {
-        if (res && res.data) {
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        if (data && (data.nationalIdFrontUrl || data.bachelorCerificate || res?.data)) {
           this.isEditMode = true;
-          const data = res.data;
           
           this.basicInfoForm.get('NationalIdFrontUrl')?.clearValidators();
           this.basicInfoForm.get('NationalIdBackUrl')?.clearValidators();
@@ -332,7 +332,8 @@ export class DoctorRegisterStep3Component {
         next: (res: any) => {
           this.isLoading = false;
           this.toastr.success('Certificates updated successfully');
-          this.globalUserStateService.hydrateNextStep('WaitForAcctivation');
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep ?? 'WaitForAcctivation';
+          this.globalUserStateService.hydrateNextStep(nextStep);
           this.route.navigate(['doctor/auth/watingForAcctivation'], { replaceUrl: true });
         },
         error: (err: any) => {
@@ -367,7 +368,8 @@ export class DoctorRegisterStep3Component {
       this.doctorAuthService.doctorCertificate(formData).subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          this.globalUserStateService.hydrateNextStep('WaitForAcctivation');
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep ?? 'WaitForAcctivation';
+          this.globalUserStateService.hydrateNextStep(nextStep);
           this.route.navigate(['doctor/auth/watingForAcctivation'], { replaceUrl: true });
         },
         error: (err: any) => {

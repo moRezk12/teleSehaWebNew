@@ -55,11 +55,12 @@ export class PatientProfileComponent implements OnInit {
 
   loadAllData() {
     this.patientAuthService.getInfoLists().subscribe({
-      next: (res) => {
-        this.countries = res.countries || [];
-        this.maritalStatus = res.maritalStatus || [];
-        const rawJobs = res.jobTitles || res.jobTitle || [];
-        this.jobTitles = rawJobs.map((item: any) => {
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.countries = data?.countries || [];
+        this.maritalStatus = data?.maritalStatus || [];
+        const rawJobs = data?.jobTitles || data?.jobTitle || [];
+        this.jobTitles = (Array.isArray(rawJobs) ? rawJobs : []).map((item: any) => {
           if (typeof item === 'string') return item;
           return item.titleAr || item.titleEn || item.nameAr || item.nameEn || item.name || item.title || '';
         }).filter(Boolean);
@@ -75,8 +76,8 @@ export class PatientProfileComponent implements OnInit {
   loadPatientDetails() {
     if (!this.patientId) return;
     this.patientService.getPatientProfile(Number(this.patientId)).subscribe({
-      next: (res) => {
-        this.dataProfile = res.patient?.data || res.patient || res.data;
+      next: (res: any) => {
+        this.dataProfile = res?.data?.patient ?? res?.patient?.data ?? res?.patient ?? res?.data ?? res;
         this.populateForm();
       },
       error: () => {

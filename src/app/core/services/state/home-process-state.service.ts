@@ -6,8 +6,10 @@ export class HomeProcessStateService {
   readonly patients = this._patients.asReadonly();
 
   hydrateFromLoginResponse(res: any): void {
-    if (res?.data?.user?.patients?.length > 0) {
-      this._patients.set(res.data.user.patients);
+    const data = res?.data ?? res;
+    const patients = data?.user?.patients;
+    if (Array.isArray(patients) && patients.length > 0) {
+      this._patients.set(patients);
     }
   }
 

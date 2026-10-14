@@ -113,12 +113,13 @@ export class PatientLoginComponent implements AfterViewInit {
 
     this.isLoading = true;
     this.patientAuthService.loginMobile(formatted).subscribe({
-      next: (res: INextStep) => {
+      next: (res: any) => {
         this.isLoading = false;
-        this.globalUserStateService.hydrateNextStep(res.nextStep);
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        this.globalUserStateService.hydrateNextStep(nextStep);
         this.authProcessStateService.setMobile(formatted);
 
-        switch (res.nextStep) {
+        switch (nextStep) {
           case INextStepEnum.OtpConfirm:
             this.toaster.success('OTP Sent Successfully');
             this.route.navigate(['patient/auth/verify-otp'], { replaceUrl: true });
@@ -131,9 +132,10 @@ export class PatientLoginComponent implements AfterViewInit {
             if (!token) {
               this.isLoading = true;
               this.patientAuthService.resendOtp(formatted).subscribe({
-                next: (resendRes: INextStep) => {
+                next: (resendRes: any) => {
                   this.isLoading = false;
-                  this.globalUserStateService.hydrateNextStep(resendRes.nextStep);
+                  const resendNextStep = resendRes?.meta?.nextStep ?? resendRes?.nextStep;
+                  this.globalUserStateService.hydrateNextStep(resendNextStep);
                   this.toaster.success('OTP Resent Successfully');
                   this.route.navigate(['patient/auth/verify-otp'], { replaceUrl: true });
                 },
@@ -156,7 +158,7 @@ export class PatientLoginComponent implements AfterViewInit {
             this.route.navigate(['patient/home'], { replaceUrl: true });
             break;
           default:
-            this.globalUserStateService.hydrateNextStep(res.nextStep);
+            this.globalUserStateService.hydrateNextStep(nextStep);
             break;
         }
       },

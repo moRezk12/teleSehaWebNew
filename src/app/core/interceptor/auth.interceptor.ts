@@ -39,7 +39,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         if (refreshToken) {
           return refreshService.refreshLogin(refreshToken).pipe(
             switchMap((res: any) => {
-              const newAccessToken = res.data.accessToken;
+              const newAccessToken = res?.data?.accessToken ?? res?.accessToken;
 
               // Instead of manually setting tokens, hydrate the whole state like the guard does
               globalUserStateService.hydrateFromLoginResponse(res);

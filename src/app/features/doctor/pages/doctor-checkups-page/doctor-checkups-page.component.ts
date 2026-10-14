@@ -77,7 +77,7 @@ export class DoctorCheckupsPageComponent implements OnInit {
     this.doctorService
       .getDoctorCheckups(this.doctorId, this.filter === 'completed')
       .subscribe({
-        next: (res: any[]) => (this.checkups = res || []),
+        next: (res: any) => (this.checkups = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : [])),
         error: () => {},
       });
   }
@@ -86,7 +86,7 @@ export class DoctorCheckupsPageComponent implements OnInit {
   private reloadOpenDetails(): void {
     if (!this.expandedId) return;
     this.doctorService.getCheckupDetails(this.expandedId).subscribe({
-      next: (res) => (this.details = res),
+      next: (res: any) => (this.details = res?.data ?? res),
       error: () => {},
     });
   }
@@ -97,8 +97,8 @@ export class DoctorCheckupsPageComponent implements OnInit {
     this.doctorService
       .getDoctorCheckups(this.doctorId, this.filter === 'completed')
       .subscribe({
-        next: (res: any[]) => {
-          this.checkups = res || [];
+        next: (res: any) => {
+          this.checkups = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           this.isLoading = false;
         },
         error: (err) => {
@@ -130,8 +130,8 @@ export class DoctorCheckupsPageComponent implements OnInit {
     this.showChat = false;
     this.isLoadingDetails = true;
     this.doctorService.getCheckupDetails(checkup.id).subscribe({
-      next: (res) => {
-        this.details = res;
+      next: (res: any) => {
+        this.details = res?.data ?? res;
         this.isLoadingDetails = false;
       },
       error: (err) => {
@@ -148,8 +148,8 @@ export class DoctorCheckupsPageComponent implements OnInit {
     if (this.showChat && this.chatMessages === null && this.expandedId) {
       this.isLoadingChat = true;
       this.doctorService.getCheckupChat(this.expandedId).subscribe({
-        next: (res: any[]) => {
-          this.chatMessages = res || [];
+        next: (res: any) => {
+          this.chatMessages = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           this.isLoadingChat = false;
         },
         error: (err) => {

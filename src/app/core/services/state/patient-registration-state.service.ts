@@ -9,8 +9,9 @@ export class PatientRegistrationStateService {
   readonly patientName = this._patientName.asReadonly();
 
   hydrateFromRegistrationResponse(res: any): void {
-    if (res?.data?.patientId) {
-      this._patientId.set(res.data.patientId.toString());
+    const data = res?.data ?? res;
+    if (data?.patientId) {
+      this._patientId.set(data.patientId.toString());
     }
   }
 

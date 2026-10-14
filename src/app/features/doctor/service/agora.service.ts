@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import type { IAgoraRTCClient } from 'agora-rtc-sdk-ng';
 import { Environment } from '../../../../environments/environment.development';
+import { IApiResponse } from '../../../core/models/api-response';
 import { map, Observable } from 'rxjs';
 
 export interface RtcTokenResponse {
@@ -29,14 +30,17 @@ export class AgoraService {
    */
   generateToken(checkUpId: string | number, _uid?: string | number): Observable<RtcTokenResponse> {
     return this.http
-      .get<RtcTokenResponse>(`${Environment.apiUrl}/api/meeting/rtc-token/${checkUpId}`)
+      .get<IApiResponse<RtcTokenResponse> | RtcTokenResponse>(`${Environment.apiUrl}/api/meeting/rtc-token/${checkUpId}`)
       .pipe(
-        map((res) => ({
-          token: res.token,
-          channel: res.channel,
-          app_id: res.app_id,
-          uid: Number(res.uid) || 0,
-        }))
+        map((res: any) => {
+          const data = res?.data || res;
+          return {
+            token: data.token,
+            channel: data.channel,
+            app_id: data.app_id,
+            uid: Number(data.uid) || 0,
+          };
+        })
       );
   }
 

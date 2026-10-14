@@ -91,6 +91,10 @@ export class PatientCreateNewProfileComponent implements OnInit {
     this.patientAuthService.basicInfo(this.basicInfoForm.value).subscribe({
       next: (res: any) => {
         console.log(res);
+        const data = res?.data ?? res;
+        if (data?.patientId) {
+          this.patientId = String(data.patientId);
+        }
         this.showStep1 = false;
         this.showStep2 = true;
         this.basicInfoForm.reset();
@@ -117,8 +121,8 @@ export class PatientCreateNewProfileComponent implements OnInit {
      ======================= */
   loadMedicalProfileSection() {
     this.patientAuthService.medicalProfileSection().subscribe({
-      next: (res: any[]) => {
-        this.sections = res;
+      next: (res: any) => {
+        this.sections = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         this.setCurrentSection();
       },
       error: () => {
@@ -147,20 +151,21 @@ export class PatientCreateNewProfileComponent implements OnInit {
       )
       .subscribe({
         next: (res: any) => {
-          console.log('Saved Section:', res);
+          const data = res?.data ?? res;
+          console.log('Saved Section:', data);
 
-          if (!res) return;
+          if (!data) return;
 
           /* ===== YES / NO ===== */
           this.historyform.patchValue({
-            answer: res.count > 0 ? 'Yes' : 'No',
+            answer: data.count > 0 ? 'Yes' : 'No',
           });
 
-          if (!res.subSections) return;
+          if (!data.subSections) return;
 
           /* ===== MAP SAVED DATA TO ORIGINAL STRUCTURE ===== */
           this.currentSection.subSection.forEach((sub: any) => {
-            const savedSub = res.subSections.find(
+            const savedSub = data.subSections.find(
               (s: any) => s.subSectionId === sub.subSectionId,
             );
 
@@ -286,11 +291,12 @@ export class PatientCreateNewProfileComponent implements OnInit {
 
   loadInfoLists() {
     this.patientAuthService.getInfoLists().subscribe({
-      next: (res) => {
-        this.countries = res.countries || [];
-        this.maritalStatus = res.maritalStatus || [];
-        const rawJobs = res.jobTitles || res.jobTitle || [];
-        this.jobTitles = rawJobs.map((item: any) => {
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.countries = data?.countries || [];
+        this.maritalStatus = data?.maritalStatus || [];
+        const rawJobs = data?.jobTitles || data?.jobTitle || [];
+        this.jobTitles = (Array.isArray(rawJobs) ? rawJobs : []).map((item: any) => {
           if (typeof item === 'string') return item;
           return item.titleAr || item.titleEn || item.nameAr || item.nameEn || item.name || item.title || '';
         }).filter(Boolean);

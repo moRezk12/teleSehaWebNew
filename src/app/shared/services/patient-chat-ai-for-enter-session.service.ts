@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Environment } from '../../../environments/environment.development';
+import { IApiResponse } from '../../core/models/api-response';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,13 +11,13 @@ export class PatientChatAiForEnterSessionService {
   constructor(readonly http: HttpClient) {}
 
   // Get Patient Complaint
-  getPatientComplaint(): Observable<any> {
-    return this.http.get(`${Environment.apiUrl}/api/patient-complaint`);
+  getPatientComplaint(): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(`${Environment.apiUrl}/api/patient-complaint`);
   }
 
   // START complaint
-  startPatientComplaint(text: string, appointmentId: number): Observable<any> {
-    return this.http.post(
+  startPatientComplaint(text: string, appointmentId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/patient-complaint/start/${appointmentId}`,
       JSON.stringify(text), // 👈 مهم جدًا
       {
@@ -29,8 +30,8 @@ export class PatientChatAiForEnterSessionService {
 
   // CONTINUE complaint
   // CONTINUE complaint
-  patientComplaint(text: string, complaintId: string): Observable<any> {
-    return this.http.post(
+  patientComplaint(text: string, complaintId: string): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/patient-complaint/${complaintId}`,
       JSON.stringify(text),
       {
@@ -40,6 +41,4 @@ export class PatientChatAiForEnterSessionService {
       },
     );
   }
-
-
 }

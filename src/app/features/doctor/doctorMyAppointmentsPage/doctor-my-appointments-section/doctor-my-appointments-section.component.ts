@@ -38,9 +38,9 @@ export class DoctorMyAppointmentsSectionComponent implements OnInit {
   data: any;
   getAllAppointments() {
     this.doctorService.getAllAppointments(Number(this.doctorId)).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         // console.log(res);
-        this.data = res;
+        this.data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : (res?.data ?? res));
       },
       error: (err) => {
         console.log(err);

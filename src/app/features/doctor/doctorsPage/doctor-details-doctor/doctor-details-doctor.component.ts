@@ -43,9 +43,9 @@ export class DoctorDetailsDoctorComponent implements OnInit {
   loadDoctorDetails() {
     if (this.doctorId) {
       this.doctorService.getDoctorProfile(this.doctorId).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           console.log(res);
-          this.data = res.data;
+          this.data = res?.data ?? res;
         },
         error: (err) => {
           console.log(err);

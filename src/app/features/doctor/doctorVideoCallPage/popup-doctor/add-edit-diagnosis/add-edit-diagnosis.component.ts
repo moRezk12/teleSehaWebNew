@@ -57,7 +57,8 @@ export class AddEditDiagnosisComponent implements OnInit {
   private prefillFromMeeting(): void {
     this.doctorsService.getReports(this.meetingId, true).subscribe({
       next: (res: any) => {
-        const saved: string[] = res?.diagnoses ?? [];
+        const data = res?.data ?? res;
+        const saved: string[] = data?.diagnoses ?? [];
         // نفس مصدر السيرفر بيحدّد كمان هل باقي أزرار الكشف مفتوحة ولا لأ.
         this.diagnosisState.setFromMeetingReport(this.meetingId, saved);
         if (!saved.length) return;
@@ -107,11 +108,12 @@ export class AddEditDiagnosisComponent implements OnInit {
    * الكتالوج اللي بيوصل بعد الـ prefill كان هيمسح التشخيص المحفوظ من الـ select.
    */
   private withSelectedRows(list: any[]): any[] {
+    const safeList = Array.isArray(list) ? list : [];
     const selected = (this.diagnosisForm ? this.diagnosisRows.value : []) ?? [];
     const missing = selected.filter(
-      (d: any) => d?.id != null && !list.some((x: any) => x.id === d.id),
+      (d: any) => d?.id != null && !safeList.some((x: any) => x.id === d.id),
     );
-    return [...list, ...missing];
+    return [...safeList, ...missing];
   }
 
   diagnosisSearchSubject() {
@@ -122,9 +124,10 @@ export class AddEditDiagnosisComponent implements OnInit {
         switchMap((search) => this.DoctorAuthService.getDiagnoses(search)),
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isSearching = false;
-          this.diagnoses = this.withSelectedRows(res);
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          this.diagnoses = this.withSelectedRows(list);
         },
         error: () => {
           this.isSearching = false;
@@ -154,8 +157,9 @@ export class AddEditDiagnosisComponent implements OnInit {
 
   loadDiagnoses(search: string = ''): void {
     this.DoctorAuthService.getDiagnoses(search).subscribe({
-      next: (res) => {
-        this.diagnoses = this.withSelectedRows(res);
+      next: (res: any) => {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.diagnoses = this.withSelectedRows(list);
       },
       error: (err) => {
         console.log('Diagnoses Error:', err.error);

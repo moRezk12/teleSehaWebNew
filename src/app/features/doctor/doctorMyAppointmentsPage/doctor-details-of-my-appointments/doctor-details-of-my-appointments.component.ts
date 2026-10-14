@@ -40,14 +40,15 @@ export class DoctorDetailsOfMyAppointmentsComponent implements OnInit {
     this.doctorService
       .getAppointmentsWeekNumber(this.weekNumber, Number(this.doctorId))
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           if (!res) {
             console.log('No appointments this week');
             this.data = [];
             return;
           }
 
-          this.data = res.dayAppointments;
+          const data = res?.data ?? res;
+          this.data = data?.dayAppointments ?? (Array.isArray(data) ? data : []);
         },
         // this.data = res.dayAppointments;
         error: (err) => {

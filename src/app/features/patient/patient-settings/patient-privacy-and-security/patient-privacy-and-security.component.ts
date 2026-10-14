@@ -56,11 +56,12 @@ export class PatientPrivacyAndSecurityComponent {
 
   loadPatientDetails() {
     this.patientService.getPatientProfile(Number(this.patientId)).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log(res);
-        this.dataProfile = res.patient?.data;
+        const data = res?.data ?? res;
+        this.dataProfile = data?.patient?.data ?? data;
         this.mobileForm.patchValue({
-          mobile: this.dataProfile.mobile,
+          mobile: this.dataProfile?.mobile,
         });
       },
       error: () => {

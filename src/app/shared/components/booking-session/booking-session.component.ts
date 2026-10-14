@@ -102,9 +102,10 @@ export class BookingSessionComponent implements OnChanges {
     this.sessions = [];
     this.uniqueDays = [];
     this.doctorsService.getSessions(this.doctorId!).subscribe({
-      next: (res: any[]) => {
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         /* 1️⃣ ترتيب كل السشنز بالتاريخ ثم الوقت */
-        this.sessions = res.sort((a, b) => {
+        this.sessions = list.sort((a, b) => {
           const dateA = new Date(`${a.date} ${a.start}`).getTime();
           const dateB = new Date(`${b.date} ${b.start}`).getTime();
           return dateA - dateB;
@@ -193,12 +194,13 @@ export class BookingSessionComponent implements OnChanges {
             (s) => s.sessionId === this.selectedSessionId,
           );
 
+          const bookingData = res?.data ?? res;
           this.activeBooking = {
-            id: res?.id ?? null,
-            status: res?.status ?? PatientAppointmentStatus.Created,
-            session: res?.session ?? selectedSession,
-            sessionId: res?.sessionId ?? selectedSession?.sessionId ?? this.selectedSessionId,
-            doctorCard: res?.doctorCard ?? this.doctorData,
+            id: bookingData?.id ?? null,
+            status: bookingData?.status ?? PatientAppointmentStatus.Created,
+            session: bookingData?.session ?? selectedSession,
+            sessionId: bookingData?.sessionId ?? selectedSession?.sessionId ?? this.selectedSessionId,
+            doctorCard: bookingData?.doctorCard ?? this.doctorData,
           };
           this.bookingCompleted = true;
 
@@ -220,12 +222,22 @@ export class BookingSessionComponent implements OnChanges {
             this.toastr.error(apiError.message);
             return;
           }
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toastr.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toastr.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toastr.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
               },
             );
           }
@@ -236,12 +248,11 @@ export class BookingSessionComponent implements OnChanges {
   refreshBookingStatus() {
     if (!this.patientId || !this.activeBooking) return;
     this.recentAppointmentService.appointmentComming(Number(this.patientId)).subscribe({
-      next: (res: any[]) => {
-        if (Array.isArray(res)) {
-          const found = res.find((a: any) => a.id === this.activeBooking.id);
-          if (found) {
-            this.activeBooking = found;
-          }
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        const found = list.find((a: any) => a.id === this.activeBooking.id);
+        if (found) {
+          this.activeBooking = found;
         }
       },
     });
@@ -325,12 +336,22 @@ export class BookingSessionComponent implements OnChanges {
               this.toastr.error(apiError.message);
               return;
             }
-            if (apiError?.errors) {
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toastr.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
               Object.entries(apiError.errors).forEach(
                 ([key, messages]: [string, any]) => {
-                  messages.forEach((msg: string) => {
-                    this.toastr.error(`${key} : ${msg}`);
-                  });
+                  if (Array.isArray(messages)) {
+                    messages.forEach((msg: string) => {
+                      this.toastr.error(`${key} : ${msg}`);
+                    });
+                  } else {
+                    this.toastr.error(`${key} : ${messages}`);
+                  }
                 },
               );
             }
@@ -430,15 +451,17 @@ export class BookingSessionComponent implements OnChanges {
         this.selectedAppointmentId,
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.loading = false;
-          if (!res || !res.bodyValue) {
+          const data = res?.data ?? res;
+          const bodyValue = data?.bodyValue;
+          if (!data || !bodyValue) {
             this.finishComplaint();
             return;
           }
           this.complaintStarted = true;
-          this.complaintId = res.patientMedicalComplaintId;
-          this.aiQuestion = res.bodyValue;
+          this.complaintId = data.patientMedicalComplaintId ?? res?.patientMedicalComplaintId;
+          this.aiQuestion = bodyValue;
           this.resetAnswers();
         },
         error: (err) => {
@@ -496,13 +519,15 @@ export class BookingSessionComponent implements OnChanges {
     }
 
     this.patientChatAi.patientComplaint(answer, this.complaintId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.loading = false;
-        if (!res || !res.bodyValue) {
+        const data = res?.data ?? res;
+        const bodyValue = data?.bodyValue;
+        if (!data || !bodyValue) {
           this.finishComplaint();
           return;
         }
-        this.aiQuestion = res.bodyValue;
+        this.aiQuestion = bodyValue;
         this.resetAnswers();
       },
       error: (err) => {

@@ -190,12 +190,13 @@ export class PatientPasswordComponent {
 
     this.isLoading = true;
     this.patientService.login(payload).subscribe({
-      next: (res: IpatientLoginResponse) => {
+      next: (res: any) => {
         this.isLoading = false;
         this.globalUserStateService.hydrateFromLoginResponse(res);
         this.localStorageService.hydrateFromLoginResponse(res);
 
-        switch (res.nextStep) {
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        switch (nextStep) {
           case INextStepEnum.CreatePassword:
             this.route.navigate(['patient/auth/password'], { replaceUrl: true });
             break;
@@ -238,7 +239,8 @@ export class PatientPasswordComponent {
         this.toastr.success('Password Created Successfully');
         this.globalUserStateService.hydrateFromLoginResponse(res);
         this.localStorageService.hydrateFromLoginResponse(res);
-        switch (res.nextStep) {
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        switch (nextStep) {
           case INextStepEnum.CreateProfile:
             this.route.navigate(['patient/auth/register/basic-info'], { replaceUrl: true });
             break;

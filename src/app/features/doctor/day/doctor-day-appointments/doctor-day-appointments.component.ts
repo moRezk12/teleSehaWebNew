@@ -70,8 +70,9 @@ export class DoctorDayAppointmentsComponent {
         next: (res: any) => {
           console.log('weedgsdfgfkId:', res);
           console.log(res);
-          this.data = res;
-          this.allAppointments = res.map((session: any) => ({
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          this.data = list;
+          this.allAppointments = list.map((session: any) => ({
             sessionId: session.sessionId,
             sessionStart: session.start,
             appointments: session.appointments || [],
@@ -133,18 +134,19 @@ export class DoctorDayAppointmentsComponent {
       next: (res: any) => {
         // كل القيم defensive: أي نقص في الرد ميمنعش الدخول للمكالمة —
         // زرار "بدأ" لازم يدخل الطبيب على طول من غير ما يحتاج يدوس "انضمام" بعدها.
-        this.selectedMeetingId = res.id;
-        this.localStorageService.set('meetingId', res.id);
-        this.localStorageService.set('channelName', res.channelName ?? '');
-        this.localStorageService.set('checkUpId', res.checkUp?.id ?? res.checkUpId);
-        this.localStorageService.set('patientId', res.checkUp?.patientId ?? res.patient?.patientId);
+        const meeting = res?.data ?? res;
+        this.selectedMeetingId = meeting.id;
+        this.localStorageService.set('meetingId', meeting.id);
+        this.localStorageService.set('channelName', meeting.channelName ?? '');
+        this.localStorageService.set('checkUpId', meeting.checkUp?.id ?? meeting.checkUpId);
+        this.localStorageService.set('patientId', meeting.checkUp?.patientId ?? meeting.patient?.patientId);
         this.localStorageService.set(
           'medicalHistory',
-          JSON.stringify(res.patient?.sections || []),
+          JSON.stringify(meeting.patient?.sections || []),
         );
-        this.localStorageService.set('meetingToken', res.providerToken ?? '');
-        this.localStorageService.set('agoraDetails', JSON.stringify(res));
-        this.router.navigate([`/doctor/videoCall/${res.id}`]);
+        this.localStorageService.set('meetingToken', meeting.providerToken ?? '');
+        this.localStorageService.set('agoraDetails', JSON.stringify(meeting));
+        this.router.navigate([`/doctor/videoCall/${meeting.id}`]);
       },
       error: (err) => {
         console.error('Error starting video meeting:', err);
@@ -173,11 +175,12 @@ export class DoctorDayAppointmentsComponent {
     this.uniqueDays = [];
     if (!this.doctorId) return;
     this.doctorService.getSessions(this.doctorId).subscribe({
-      next: (res: any[]) => {
-        this.sessions = res;
+      next: (res: any) => {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        this.sessions = list;
 
         this.uniqueDays = Array.from(
-          new Map(res.map((s) => [s.date, s])).values(),
+          new Map(list.map((s: any) => [s.date, s])).values(),
         );
 
         if (this.uniqueDays.length) {

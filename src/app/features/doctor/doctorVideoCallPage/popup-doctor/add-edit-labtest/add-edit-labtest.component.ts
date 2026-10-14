@@ -52,7 +52,8 @@ export class AddEditLabtestComponent implements OnInit {
   private prefillFromMeeting(): void {
     this.doctorsService.getReports(this.meetingId, true).subscribe({
       next: (res: any) => {
-        const request = res?.labAnalysisRequest;
+        const data = res?.data ?? res;
+        const request = data?.labAnalysisRequest;
         if (!request) return;
 
         this.labTestForm.patchValue({
@@ -114,13 +115,14 @@ export class AddEditLabtestComponent implements OnInit {
         switchMap((search) => this.DoctorAuthService.getLabTest(search)),
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isSearching = false;
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           // منسبش الصفوف المختارة بالفعل من غير label بعد ما القائمة تتبدل
           const selected = (this.labTestMedicines.value ?? []).filter(
-            (m: any) => m?.id != null && !res.some((x: any) => x.id === m.id),
+            (m: any) => m?.id != null && !list.some((x: any) => x.id === m.id),
           );
-          this.labTest = [...res, ...selected];
+          this.labTest = [...list, ...selected];
         },
         error: () => {
           this.isSearching = false;
@@ -157,8 +159,8 @@ export class AddEditLabtestComponent implements OnInit {
 
   loadLabTests(search: string = ''): void {
     this.DoctorAuthService.getLabTest(search).subscribe({
-      next: (res) => {
-        this.labTest = res;
+      next: (res: any) => {
+        this.labTest = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log('Lab Tests Error:', err.error);

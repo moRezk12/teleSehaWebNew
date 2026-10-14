@@ -65,7 +65,7 @@ export class PatientReportPrescriptionsSectionComponent implements OnInit {
       next: (res: any) => {
         console.log(res);
 
-        this.data = res;
+        this.data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log(err);

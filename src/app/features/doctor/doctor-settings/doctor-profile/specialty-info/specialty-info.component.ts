@@ -63,13 +63,14 @@ export class SpecialtyInfoComponent implements OnInit {
           'Doctorate': 'Doctorate, PhD, MD'
         };
 
-        if (Array.isArray(res.ScientificDegree)) {
-          this.scientificDegrees = res.ScientificDegree.map((val: string) => ({
+        const data = res?.data ?? res;
+        if (Array.isArray(data?.ScientificDegree)) {
+          this.scientificDegrees = data.ScientificDegree.map((val: string) => ({
             value: val,
             label: mapping[val] || val
           }));
-        } else if (res.ScientificDegree) {
-          this.scientificDegrees = Object.keys(res.ScientificDegree).map((key: string) => ({
+        } else if (data?.ScientificDegree) {
+          this.scientificDegrees = Object.keys(data.ScientificDegree).map((key: string) => ({
             value: key,
             label: mapping[key] || key
           }));
@@ -96,7 +97,7 @@ export class SpecialtyInfoComponent implements OnInit {
     this.specialtiesService.getSpecialties().subscribe({
       next: (res: any) => {
         // console.log(res);
-        this.specialties = res.data || res;
+        this.specialties = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
     });
   }
@@ -141,10 +142,11 @@ export class SpecialtyInfoComponent implements OnInit {
 
   getDoctorJopTitle() {
     this.doctorAuthService.getDoctorJopTitle().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log(res);
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         // Correct the swapped titleAr and titleEn from the backend
-        this.jobTitles = res.map((item: any) => ({
+        this.jobTitles = list.map((item: any) => ({
           ...item,
           titleAr: item.titleEn,
           titleEn: item.titleAr
@@ -159,8 +161,8 @@ export class SpecialtyInfoComponent implements OnInit {
 
   loadDoctorDetails() {
     this.doctorService.getDoctorProfile(this.doctorId).subscribe({
-      next: (res) => {
-        this.dataProfile = res.data;
+      next: (res: any) => {
+        this.dataProfile = res?.data ?? res;
 
         // ابحث عن الـ jobTitle object من الـ jobTitles list
         const matchedJobTitle = this.jobTitles.find(
@@ -244,12 +246,12 @@ export class SpecialtyInfoComponent implements OnInit {
     this.doctorService
       .updateDoctorProfileSpecialty(this.doctorId, formData)
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           console.log(res);
-          console.log(res.imageUrl);
+          const data = res?.data ?? res;
           this.toastr.success('Doctor info updated successfully');
-          this.localStorageService.setDoctorName(res.name);
-          this.localStorageService.setDoctorImage(res.imageUrl);
+          this.localStorageService.setDoctorName(data.name);
+          this.localStorageService.setDoctorImage(data.imageUrl);
           this.loadDoctorDetails();
           this.showBtnSave.set(false);
           this.basicInfoForm.disable();

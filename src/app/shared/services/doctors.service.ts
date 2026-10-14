@@ -2,6 +2,7 @@ import { HttpClient, HttpParams, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Environment } from '../../../environments/environment.development';
+import { IApiResponse } from '../../core/models/api-response';
 import { IDoctorResponse } from '../interface/doctor.interface';
 import { SKIP_GLOBAL_ERROR_HANDLING } from '../../core/interceptor/global-handler.interceptor';
 import { SKIP_GLOBAL_LOADING } from '../../core/interceptor/loading.interceptor';
@@ -23,7 +24,7 @@ export class DoctorsService {
     // Limit?: number | null,
     LastId?: number | null,
     SortBy?: string | null,
-  ): Observable<IDoctorResponse> {
+  ): Observable<IApiResponse<IDoctorResponse[]> & IDoctorResponse> {
     let params = new HttpParams();
 
     if (Search) params = params.set('Search', Search);
@@ -52,44 +53,44 @@ export class DoctorsService {
     // if (Limit !== null && Limit !== undefined)
     //   params = params.set('Limit', Limit);
 
-    return this.http.get<IDoctorResponse>(`${Environment.apiUrl}/api/doctor`, {
+    return this.http.get<IApiResponse<IDoctorResponse[]> & IDoctorResponse>(`${Environment.apiUrl}/api/doctor`, {
       params,
     });
   }
 
-  getDoctorProfile(doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getDoctorProfile(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-profile/${doctorId}`,
     );
   }
 
   // Update General Information Doctor Profile
-  updateDoctorProfile(doctorId: number, data: any): Observable<any> {
-    return this.http.put<any>(
+  updateDoctorProfile(doctorId: number, data: any): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor-profile/${doctorId}`,
       data,
     );
   }
 
   // Update Specialty Information Doctor Profile
-  updateDoctorProfileSpecialty(doctorId: number, data: any): Observable<any> {
-    return this.http.put<any>(
+  updateDoctorProfileSpecialty(doctorId: number, data: any): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/doctor/${doctorId}`,
       data,
     );
   }
 
   // Get Sessions
-  getSessions(doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getSessions(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor/${doctorId}/sessions`,
       { context: new HttpContext().set(SKIP_GLOBAL_ERROR_HANDLING, true) }
     );
   }
 
   // Get  Appointments
-  gethomeAppointments(doctorId: number): Observable<any> {
-    return this.http.get<any>(`${Environment.apiUrl}/api/home/${doctorId}`);
+  gethomeAppointments(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(`${Environment.apiUrl}/api/home/${doctorId}`);
   }
   // Get All Appointments
   // getAppointments(doctorId: number): Observable<any> {
@@ -105,23 +106,23 @@ export class DoctorsService {
   getAppointmentsToday(
     doctorId: number,
     includeCompleted = false,
-  ): Observable<any> {
+  ): Observable<IApiResponse<any>> {
     const query = includeCompleted ? '?includeCompleted=true' : '';
-    return this.http.get<any>(
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/today/${doctorId}${query}`,
     );
   }
 
   // Get Appointment Day
-  getAppointmentsDay(date: string, doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getAppointmentsDay(date: string, doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/day/${date}/${doctorId}`,
     );
   }
 
   // Get Appointment This Week
-  getAppointmentsWeek(doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getAppointmentsWeek(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/this-week/${doctorId}`,
     );
   }
@@ -130,53 +131,53 @@ export class DoctorsService {
   getAppointmentsWeekNumber(
     weekNumber: number,
     doctorId: number,
-  ): Observable<any> {
-    return this.http.get<any>(
+  ): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/week/${weekNumber}/${doctorId}`,
     );
   }
 
   // Get Follow Up Appointments
-  getFollowUpAppointments(doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getFollowUpAppointments(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/follow-up-appointments/${doctorId}`,
     );
   }
 
   // Get All Appointments
-  getAllAppointments(doctorId: number): Observable<any> {
-    return this.http.get<any>(
+  getAllAppointments(doctorId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/all/${doctorId}`,
     );
   }
 
   // Confirm Appointment
-  confirmAppointment(appointmentId: number): Observable<any> {
-    return this.http.post<any>(
+  confirmAppointment(appointmentId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/confirm/${appointmentId}`,
       {},
     );
   }
 
   // Open Appointment
-  openAppointment(appointmentId: number): Observable<any> {
-    return this.http.post<any>(
+  openAppointment(appointmentId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/open/${appointmentId}`,
       {},
     );
   }
 
   // Cancel Appointment
-  cancelAppointment(appointmentId: number): Observable<any> {
-    return this.http.post<any>(
+  cancelAppointment(appointmentId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/cancel/${appointmentId}`,
       {},
     );
   }
 
   // close Appointment
-  closeAppointment(appointmentId: number): Observable<any> {
-    return this.http.post<any>(
+  closeAppointment(appointmentId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/close/${appointmentId}`,
       {},
     );
@@ -186,59 +187,59 @@ export class DoctorsService {
   updateAppointment(
     appointmentId: number,
     newSessionId: number,
-  ): Observable<any> {
-    return this.http.put<any>(
+  ): Observable<IApiResponse<any>> {
+    return this.http.put<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/appointment/${appointmentId}/${newSessionId}`,
       {},
     );
   }
 
-  getMeetingDetails(meetingId: number): Observable<any> {
-    return this.http.get<any>(
+  getMeetingDetails(meetingId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/meeting/initial-data/${meetingId}`,
     );
   }
 
   // Get Reports — withReports=true يضمّ الروشتة والتحاليل والأشعة بنتائجها
   // (الاعتماد على الـ lazy loading هنا مضمونش لأن الاستعلام AsNoTracking).
-  getReports(id: number, withReports = false): Observable<any> {
+  getReports(id: number, withReports = false): Observable<IApiResponse<any>> {
     const query = withReports ? '?withReports=true' : '';
-    return this.http.get<any>(
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/meeting/reports/${id}${query}`,
     );
   }
 
 
-  closeMeeting(meetingId: number): Observable<any> {
-    return this.http.post<any>(
+  closeMeeting(meetingId: number): Observable<IApiResponse<any>> {
+    return this.http.post<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/meeting/close/${meetingId}`,
       {},
     );
   }
 
-  getEnum(): Observable<any> {
-    return this.http.get<any>(`${Environment.apiUrl}/api/enum`);
+  getEnum(): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(`${Environment.apiUrl}/api/enum`);
   }
 
   /** سجل كشوفات الطبيب (الأحدث أولاً). completedOnly=true للمكتملة بس. */
-  getDoctorCheckups(doctorId: number, completedOnly = false): Observable<any> {
+  getDoctorCheckups(doctorId: number, completedOnly = false): Observable<IApiResponse<any>> {
     const query = completedOnly ? '?completedOnly=true' : '';
-    return this.http.get<any>(
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/check-up/all/${doctorId}${query}`,
     );
   }
 
   /** تفاصيل كشف واحد: بيانات المريض + كل ميتينج بروشتته وتحاليله وأشعته مع النتائج المرفوعة. */
-  getCheckupDetails(checkupId: number): Observable<any> {
-    return this.http.get<any>(
+  getCheckupDetails(checkupId: number): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/doctor-app/check-up/${checkupId}`,
       { context: new HttpContext().set(SKIP_GLOBAL_LOADING, true) }
     );
   }
 
   /** رسائل شات الكشف (نفس endpoint المريض — العضوية بتتحقق على السيرفر). */
-  getCheckupChat(checkupId: number, count = 100): Observable<any> {
-    return this.http.get<any>(
+  getCheckupChat(checkupId: number, count = 100): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/chat-message/${checkupId}?count=${count}`,
       { context: new HttpContext().set(SKIP_GLOBAL_LOADING, true) }
     );

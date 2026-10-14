@@ -66,7 +66,8 @@ export class InfoAboutYouComponent implements OnInit {
 
   loadExistingData() {
     this.patientService.getPatientProfile(Number(this.patientId)).subscribe({
-      next: (data: any) => {
+      next: (res: any) => {
+        const data = res?.data ?? res;
         if (data) {
           if (data.name) {
             this.patientRegistrationStateService.setPatientName(data.name);
@@ -243,12 +244,22 @@ export class InfoAboutYouComponent implements OnInit {
             return;
           }
 
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toastr.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toastr.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toastr.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
               },
             );
           }

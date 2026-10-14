@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import * as signalR from '@microsoft/signalr';
 import { Environment } from '../../../../environments/environment.development';
+import { IApiResponse } from '../../../core/models/api-response';
 import { LocalstorageService } from '../../../core/services/localstorage.service';
 import { HubTokenService } from '../../../shared/services/hub-token.service';
 import type { TeleSehaNotificationListItem } from '../models/notification.models';
@@ -142,15 +143,15 @@ export class NotificationService implements OnDestroy {
     this.notifications$.next(notifications);
   }
 
-  getPatientNotifications(patientId: string): Observable<unknown> {
-    return this.http.get<unknown>(
+  getPatientNotifications(patientId: string): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/notification/${patientId}`,
       this._authHeaders()
     );
   }
 
-  getDoctorNotifications(doctorId: string): Observable<unknown> {
-    return this.http.get<unknown>(
+  getDoctorNotifications(doctorId: string): Observable<IApiResponse<any>> {
+    return this.http.get<IApiResponse<any>>(
       `${Environment.apiUrl}/api/notification/doctor-app/${doctorId}`,
       this._authHeaders()
     );

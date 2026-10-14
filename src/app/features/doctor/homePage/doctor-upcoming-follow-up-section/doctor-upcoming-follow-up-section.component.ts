@@ -28,8 +28,9 @@ export class DoctorUpcomingFollowUpSectionComponent {
   getFollowUpAppointments() {
     if (this.doctorId) {
       this.doctorService.gethomeAppointments(this.doctorId).subscribe({
-        next: (res) => {
-          this.data = res.followUpsCount;
+        next: (res: any) => {
+          const stats = res?.data ?? res;
+          this.data = stats?.followUpsCount ?? stats;
           console.log('Follow Up Appointments:', res);
         },
         error: (err) => {

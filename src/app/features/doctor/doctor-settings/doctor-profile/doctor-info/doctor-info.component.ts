@@ -76,8 +76,9 @@ export class DoctorInfoComponent implements OnInit {
 
   loadInfoLists() {
     this.patientAuthService.getInfoLists().subscribe({
-      next: (res) => {
-        this.countries = res.countries || [];
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.countries = data?.countries || [];
         this.listenToChanges();
         this.loadDoctorDetails();
       },
@@ -89,8 +90,8 @@ export class DoctorInfoComponent implements OnInit {
 
   getDoctorDataList() {
     this.doctorAuthService.getDoctorDataList().subscribe({
-      next: (res) => {
-        this.University = res;
+      next: (res: any) => {
+        this.University = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         this.loadInfoLists();
       },
       error: () => {
@@ -122,8 +123,8 @@ export class DoctorInfoComponent implements OnInit {
   specialties: ISpecialties[] = [];
   getAllSpecialties() {
     this.specialtiesService.getSpecialties().subscribe({
-      next: (res) => {
-        this.specialties = res.data || res;
+      next: (res: any) => {
+        this.specialties = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.error('Failed to load specialties', err);
@@ -150,8 +151,8 @@ export class DoctorInfoComponent implements OnInit {
   }
   loadDoctorDetails() {
     this.doctorService.getDoctorProfile(this.doctorId).subscribe({
-      next: (res) => {
-        this.dataProfile = res.data;
+      next: (res: any) => {
+        this.dataProfile = res?.data ?? res;
         const profile = this.dataProfile?.doctorProfile;
 
         const birthDate = profile?.birthDate

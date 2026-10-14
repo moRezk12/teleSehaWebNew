@@ -54,8 +54,8 @@ export class PatientMedicalHistoryComponent {
      ======================= */
   loadMedicalProfileSection() {
     this.patientAuthService.medicalProfileSection().subscribe({
-      next: (res: any[]) => {
-        this.sections = res;
+      next: (res: any) => {
+        this.sections = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         this.setCurrentSection();
       },
       error: () => {
@@ -84,20 +84,21 @@ export class PatientMedicalHistoryComponent {
       )
       .subscribe({
         next: (res: any) => {
-          console.log('Saved Section:', res);
+          const data = res?.data ?? res;
+          console.log('Saved Section:', data);
 
-          if (!res) return;
+          if (!data) return;
 
           /* ===== YES / NO ===== */
           this.form.patchValue({
-            answer: res.count > 0 ? 'Yes' : 'No',
+            answer: data.count > 0 ? 'Yes' : 'No',
           });
 
-          if (!res.subSections) return;
+          if (!data.subSections) return;
 
           /* ===== MAP SAVED DATA TO ORIGINAL STRUCTURE ===== */
           this.currentSection.subSection.forEach((sub: any) => {
-            const savedSub = res.subSections.find(
+            const savedSub = data.subSections.find(
               (s: any) => s.subSectionId === sub.subSectionId,
             );
 

@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Environment } from '../../../environments/environment.development';
+import { IApiResponse } from '../../core/models/api-response';
+import { ISpecialties } from '../interface/specialties.interface';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,7 +12,7 @@ export class SpecialtiesService {
   constructor(readonly http: HttpClient) {}
 
   // Get All Specialties
-  getSpecialties(): Observable<any> {
-    return this.http.get<any>(`${Environment.apiUrl}/api/speciality`);
+  getSpecialties(): Observable<IApiResponse<ISpecialties[]>> {
+    return this.http.get<IApiResponse<ISpecialties[]>>(`${Environment.apiUrl}/api/speciality`);
   }
 }

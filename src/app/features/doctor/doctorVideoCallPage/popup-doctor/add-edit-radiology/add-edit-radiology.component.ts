@@ -52,7 +52,8 @@ export class AddEditRadiologyComponent implements OnInit {
   private prefillFromMeeting(): void {
     this.doctorsService.getReports(this.meetingId, true).subscribe({
       next: (res: any) => {
-        const request = res?.radiologicalExaminationRequest;
+        const data = res?.data ?? res;
+        const request = data?.radiologicalExaminationRequest;
         if (!request) return;
 
         this.radiologyForm.patchValue({
@@ -99,13 +100,14 @@ export class AddEditRadiologyComponent implements OnInit {
         switchMap((search) => this.DoctorAuthService.getRadiology(search)),
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isSearching = false;
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           // منسبش الصفوف المختارة بالفعل من غير label بعد ما القائمة تتبدل
           const selected = (this.radiologyMedicines.value ?? []).filter(
-            (m: any) => m?.id != null && !res.some((x: any) => x.id === m.id),
+            (m: any) => m?.id != null && !list.some((x: any) => x.id === m.id),
           );
-          this.radiology = [...res, ...selected];
+          this.radiology = [...list, ...selected];
         },
         error: () => {
           this.isSearching = false;
@@ -156,8 +158,8 @@ export class AddEditRadiologyComponent implements OnInit {
 
   loadRadiology(search: string = ''): void {
     this.DoctorAuthService.getRadiology(search).subscribe({
-      next: (res) => {
-        this.radiology = res;
+      next: (res: any) => {
+        this.radiology = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log('Radiology Error:', err.error);

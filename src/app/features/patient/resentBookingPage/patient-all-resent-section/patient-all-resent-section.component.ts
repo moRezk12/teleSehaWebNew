@@ -80,17 +80,23 @@ export class PatientAllResentSectionComponent implements OnInit {
     // nothing once every booking is finished, so on its own the page emptied out and the whole
     // history was lost. History (Completed/Canceled) is appended after the active ones. Each
     // call is guarded so one empty/failed side does not blank the other.
+    const extractList = (res: any): any[] => {
+      if (Array.isArray(res)) return res;
+      if (Array.isArray(res?.data)) return res.data;
+      return [];
+    };
+
     forkJoin({
       comming: this.recentAppointmentService
         .appointmentComming(pid)
-        .pipe(catchError(() => of([]))),
+        .pipe(catchError(() => of(null))),
       history: this.recentAppointmentService
         .appointmentHistory(pid)
-        .pipe(catchError(() => of([]))),
+        .pipe(catchError(() => of(null))),
     }).subscribe({
       next: ({ comming, history }) => {
-        const active = Array.isArray(comming) ? comming : [];
-        const past = Array.isArray(history) ? history : [];
+        const active = extractList(comming);
+        const past = extractList(history);
         this.data = [...active, ...past];
       },
     });
@@ -208,12 +214,22 @@ export class PatientAllResentSectionComponent implements OnInit {
               return;
             }
 
-            if (apiError?.errors) {
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toaster.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
               Object.entries(apiError.errors).forEach(
                 ([key, messages]: [string, any]) => {
-                  messages.forEach((msg: string) => {
-                    this.toaster.error(`${key} : ${msg}`);
-                  });
+                  if (Array.isArray(messages)) {
+                    messages.forEach((msg: string) => {
+                      this.toaster.error(`${key} : ${msg}`);
+                    });
+                  } else {
+                    this.toaster.error(`${key} : ${messages}`);
+                  }
                 },
               );
             }
@@ -346,19 +362,21 @@ export class PatientAllResentSectionComponent implements OnInit {
         this.selectedAppointmentId,
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.loading = false;
 
           // لما الفحص يكتمل السيرفر بيرجع 200 فاضي (من غير bodyValue) — الكود القديم
           // كان بيعمل res.bodyValue على null فبيكرش والبوب أب يفضل معلّق للأبد.
-          if (!res || !res.bodyValue) {
+          const data = res?.data ?? res;
+          const bodyValue = data?.bodyValue;
+          if (!data || !bodyValue) {
             this.finishComplaint();
             return;
           }
 
           this.complaintStarted = true;
-          this.complaintId = res.patientMedicalComplaintId;
-          this.aiQuestion = res.bodyValue;
+          this.complaintId = data.patientMedicalComplaintId ?? res?.patientMedicalComplaintId;
+          this.aiQuestion = bodyValue;
           this.resetAnswers();
         },
         error: (err) => {
@@ -427,16 +445,18 @@ export class PatientAllResentSectionComponent implements OnInit {
     console.log('One', answer);
 
     this.patientChatAi.patientComplaint(answer, this.complaintId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.loading = false;
 
         // اكتمال الفحص = 200 فاضي: اقفل وحدّث بدل الكراش على res.bodyValue.
-        if (!res || !res.bodyValue) {
+        const data = res?.data ?? res;
+        const bodyValue = data?.bodyValue;
+        if (!data || !bodyValue) {
           this.finishComplaint();
           return;
         }
 
-        this.aiQuestion = res.bodyValue;
+        this.aiQuestion = bodyValue;
         this.resetAnswers();
       },
       error: (err) => {

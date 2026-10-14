@@ -19,10 +19,10 @@ export class PatientPrivacyPolicyComponent implements OnInit {
   loadTermsAndConditions() {
     const page = 'patient-privacy-policy';
     this.patientService.getPrivacyAndTermsAndPolicy(page).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log(res);
 
-        this.data = res.data;
+        this.data = res?.data ?? res;
       },
       error: () => {
         this.data = '';

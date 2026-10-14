@@ -58,7 +58,7 @@ export class BasicMedicalHistoryComponent {
   loadMedicalProfileSection() {
     this.patientAuthService.medicalProfileSection().subscribe({
       next: (res: any) => {
-        this.sections = res;
+        this.sections = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         const from = this.activatedRoute.snapshot.queryParamMap.get('from');
         if (from === 'info-about-you' && this.sections.length > 0) {
           this.currentIndex = this.sections.length - 1;
@@ -93,18 +93,19 @@ export class BasicMedicalHistoryComponent {
       )
       .subscribe({
         next: (res: any) => {
-          if (!res) return;
+          const data = res?.data ?? res;
+          if (!data) return;
 
           /* ===== YES / NO ===== */
           this.form.patchValue({
-            answer: res.count > 0 ? 'Yes' : 'No',
+            answer: data.count > 0 ? 'Yes' : 'No',
           });
 
-          if (!res.subSections) return;
+          if (!data.subSections) return;
 
           /* ===== MAP SAVED DATA TO ORIGINAL STRUCTURE ===== */
           this.currentSection.subSection.forEach((sub: any) => {
-            const savedSub = res.subSections.find(
+            const savedSub = data.subSections.find(
               (s: any) => s.subSectionId === sub.subSectionId,
             );
 
@@ -158,12 +159,22 @@ export class BasicMedicalHistoryComponent {
             return;
           }
 
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toastr.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toastr.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toastr.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
               },
             );
           }

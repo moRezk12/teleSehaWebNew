@@ -75,12 +75,13 @@ export class BasicInfoComponent implements OnInit {
     this.isLoading = true;
     this.patientService.getPatientProfile(Number(this.patientId)).subscribe({
       next: (res: any) => {
-        if (res) {
+        const data = res?.data ?? res;
+        if (data) {
           this.isEditMode = true;
           this.basicInfoForm.patchValue({
-            Name: res.name || '',
-            IsMale: res.isMale !== undefined ? res.isMale : '',
-            BirthDate: res.birthDate ? new Date(res.birthDate) : '',
+            Name: data.name || '',
+            IsMale: data.isMale !== undefined ? data.isMale : '',
+            BirthDate: data.birthDate ? new Date(data.birthDate) : '',
           });
         }
         this.isLoading = false;
@@ -156,8 +157,13 @@ export class BasicInfoComponent implements OnInit {
       this.patientAuthService.basicInfo(this.basicInfoForm.value).subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          this.patientRegistrationStateService.setPatientName(res.data.name);
-          this.patientRegistrationStateService.setPatientId(res.data.patientId);
+          const data = res?.data ?? res;
+          if (data?.name) {
+            this.patientRegistrationStateService.setPatientName(data.name);
+          }
+          if (data?.patientId) {
+            this.patientRegistrationStateService.setPatientId(data.patientId.toString());
+          }
           this.route.navigate(['patient/auth/register/medical-history'], { replaceUrl: true });
         },
         error: () => {

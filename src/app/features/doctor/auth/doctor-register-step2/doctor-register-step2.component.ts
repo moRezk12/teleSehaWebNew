@@ -89,10 +89,10 @@ export class DoctorRegisterStep2Component implements OnInit {
   loadExistingData() {
     this.isLoading = true;
     this.doctorAuthService.getDoctorProfileById(this.doctorId).subscribe({
-      next: (res) => {
-        if (res && res.data) {
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        if (data && (data.description || data.country || data.city || res?.data)) {
           this.isEditMode = true;
-          const data = res.data;
 
           const countryName = data.country || '';
           this.basicInfoForm.patchValue({
@@ -265,8 +265,9 @@ export class DoctorRegisterStep2Component implements OnInit {
           this.isLoading = false;
           this.toastr.success('Profile updated successfully');
 
-          if (res?.nextStep) {
-            this.globalUserStateService.hydrateNextStep(res.nextStep);
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+          if (nextStep) {
+            this.globalUserStateService.hydrateNextStep(nextStep);
           }
 
           this.route.navigate(['doctor/auth/register/createCertificates'], { replaceUrl: true });
@@ -279,8 +280,9 @@ export class DoctorRegisterStep2Component implements OnInit {
       this.doctorAuthService.doctorProfile(formData).subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          if (res?.nextStep) {
-            this.globalUserStateService.hydrateNextStep(res.nextStep);
+          const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+          if (nextStep) {
+            this.globalUserStateService.hydrateNextStep(nextStep);
           }
 
           this.route.navigate(['doctor/auth/register/createCertificates'], { replaceUrl: true });

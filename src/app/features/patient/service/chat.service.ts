@@ -4,6 +4,7 @@ import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular
 import { catchError, map, Observable, throwError } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { Environment } from '../../../../environments/environment.development';
+import { IApiResponse } from '../../../core/models/api-response';
 import { GlobalUserStateService } from '../../../core/services/state/global-user-state.service';
 import { HubTokenService } from '../../../shared/services/hub-token.service';
 import { SKIP_GLOBAL_LOADING } from '../../../core/interceptor/loading.interceptor';
@@ -129,7 +130,7 @@ export class ChatService implements OnDestroy {
   private getChatMessages(
     checkupId: string,
     options?: { from?: string | number; count?: number }
-  ): Observable<any> {
+  ): Observable<IApiResponse<any>> {
     let params = new HttpParams();
     if (options?.from != null && options.from !== '') {
       params = params.set('from', String(options.from));
@@ -138,7 +139,7 @@ export class ChatService implements OnDestroy {
       params = params.set('count', String(options.count));
     }
     const q = params.keys().length ? { params } : {};
-    return this.http.get<any>(`${this.chatMessageApiBase}/${checkupId}`, {
+    return this.http.get<IApiResponse<any>>(`${this.chatMessageApiBase}/${checkupId}`, {
       ...q,
       ...this._chatAuthHeaders()
     });

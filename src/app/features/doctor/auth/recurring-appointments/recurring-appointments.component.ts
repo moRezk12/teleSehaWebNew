@@ -136,9 +136,9 @@ export class RecurringAppointmentsComponent implements OnInit {
   schedules: any[] = [];
   loadDoctorSchedule() {
     this.doctorAuthService.getDoctorSchedule(this.doctorId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         // console.log(res);
-        this.schedules = res;
+        this.schedules = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         const apiError = err?.error;
@@ -148,12 +148,22 @@ export class RecurringAppointmentsComponent implements OnInit {
           return;
         }
 
-        if (apiError?.errors) {
+        if (Array.isArray(apiError?.errors)) {
+          apiError.errors.forEach((errItem: any) => {
+            const msg = errItem?.message || errItem;
+            const field = errItem?.field ? `${errItem.field}: ` : '';
+            this.toastr.error(`${field}${msg}`);
+          });
+        } else if (apiError?.errors) {
           Object.entries(apiError.errors).forEach(
             ([key, messages]: [string, any]) => {
-              messages.forEach((msg: string) => {
-                this.toastr.error(`${key} : ${msg}`);
-              });
+              if (Array.isArray(messages)) {
+                messages.forEach((msg: string) => {
+                  this.toastr.error(`${key} : ${msg}`);
+                });
+              } else {
+                this.toastr.error(`${key} : ${messages}`);
+              }
             },
           );
         }
@@ -227,12 +237,22 @@ export class RecurringAppointmentsComponent implements OnInit {
               return;
             }
 
-            if (apiError?.errors) {
+            if (Array.isArray(apiError?.errors)) {
+              apiError.errors.forEach((errItem: any) => {
+                const msg = errItem?.message || errItem;
+                const field = errItem?.field ? `${errItem.field}: ` : '';
+                this.toastr.error(`${field}${msg}`);
+              });
+            } else if (apiError?.errors) {
               Object.entries(apiError.errors).forEach(
                 ([key, messages]: [string, any]) => {
-                  messages.forEach((msg: string) => {
-                    this.toastr.error(`${key} : ${msg}`);
-                  });
+                  if (Array.isArray(messages)) {
+                    messages.forEach((msg: string) => {
+                      this.toastr.error(`${key} : ${msg}`);
+                    });
+                  } else {
+                    this.toastr.error(`${key} : ${messages}`);
+                  }
                 },
               );
             }
@@ -256,12 +276,22 @@ export class RecurringAppointmentsComponent implements OnInit {
             return;
           }
 
-          if (apiError?.errors) {
+          if (Array.isArray(apiError?.errors)) {
+            apiError.errors.forEach((errItem: any) => {
+              const msg = errItem?.message || errItem;
+              const field = errItem?.field ? `${errItem.field}: ` : '';
+              this.toastr.error(`${field}${msg}`);
+            });
+          } else if (apiError?.errors) {
             Object.entries(apiError.errors).forEach(
               ([key, messages]: [string, any]) => {
-                messages.forEach((msg: string) => {
-                  this.toastr.error(`${key} : ${msg}`);
-                });
+                if (Array.isArray(messages)) {
+                  messages.forEach((msg: string) => {
+                    this.toastr.error(`${key} : ${msg}`);
+                  });
+                } else {
+                  this.toastr.error(`${key} : ${messages}`);
+                }
               },
             );
           }
@@ -312,12 +342,22 @@ export class RecurringAppointmentsComponent implements OnInit {
           return;
         }
 
-        if (apiError?.errors) {
+        if (Array.isArray(apiError?.errors)) {
+          apiError.errors.forEach((errItem: any) => {
+            const msg = errItem?.message || errItem;
+            const field = errItem?.field ? `${errItem.field}: ` : '';
+            this.toastr.error(`${field}${msg}`);
+          });
+        } else if (apiError?.errors) {
           Object.entries(apiError.errors).forEach(
             ([key, messages]: [string, any]) => {
-              messages.forEach((msg: string) => {
-                this.toastr.error(`${key} : ${msg}`);
-              });
+              if (Array.isArray(messages)) {
+                messages.forEach((msg: string) => {
+                  this.toastr.error(`${key} : ${msg}`);
+                });
+              } else {
+                this.toastr.error(`${key} : ${messages}`);
+              }
             },
           );
         }

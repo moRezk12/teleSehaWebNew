@@ -58,10 +58,13 @@ export class ForgetPasswordComponent {
     this.doctorAuthService.loginMobile(this.mobileForm.value.mobile).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        this.localStorageService.setNextStepEnum(res.nextStep);
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        if (nextStep) {
+          this.localStorageService.setNextStepEnum(nextStep);
+        }
         this.localStorageService.setMobile(this.mobileForm.value.mobile);
 
-        switch (res.nextStep) {
+        switch (nextStep) {
           case INextStepEnum.OtpConfirm:
             this.toaster.success('OTP Sent Successfully');
             this.route.navigate(['doctor/auth/verify-otp'], { replaceUrl: true });
@@ -76,7 +79,9 @@ export class ForgetPasswordComponent {
             this.route.navigate(['doctor/home'], { replaceUrl: true });
             break;
           default:
-            this.localStorageService.setNextStepEnum(res.nextStep);
+            if (nextStep) {
+              this.localStorageService.setNextStepEnum(nextStep);
+            }
             break;
         }
       },

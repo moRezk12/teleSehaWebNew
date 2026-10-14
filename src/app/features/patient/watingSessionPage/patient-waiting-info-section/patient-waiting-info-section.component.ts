@@ -123,13 +123,14 @@ export class PatientWaitingInfoSectionComponent implements OnInit {
   getSession() {
     if (!this.sessionId) return;
     this.patientService.waitingSession(Number(this.sessionId)).subscribe({
-      next: (res) => {
-        this.session = res;
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.session = data;
 
         // Recover from a missed realtime event: if our appointment is already Started with an
         // ongoing meeting, populate startedData so the (already-rendered) "join" button enables
         // and the patient can enter the call manually instead of being stuck waiting.
-        const myStarted = (res?.appointments ?? []).find(
+        const myStarted = (data?.appointments ?? []).find(
           (a: any) => a?.status === 'Started',
         );
         const hasOngoing = (myStarted?.checkUp?.meetings ?? []).some(

@@ -21,7 +21,7 @@ export class SearchForDoctorAllDoctorComponent {
   listenToDoctors() {
     this.doctorsService.getDoctors().subscribe({
       next: (res: any) => {
-        this.doctors = res.data || res;
+        this.doctors = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         console.log('Doctors:', this.doctors);
       },
       error: (err) => {

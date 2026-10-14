@@ -53,14 +53,10 @@ export class DoctorViewVideoCallComponent implements OnInit, OnDestroy {
 
   checkMeetingStatus() {
     this.doctorService.getReports(this.meetingId).subscribe({
-      next: (res) => {
-        // الاجتماع بيتقفل من الباك اند أو بقرار الطبيب فقط — مش من ساعة المتصفح.
-        // قفل الكشف انتقال لا رجعة فيه، ومينفعش يتقاد من الوقت المنقضي في المتصفح:
-        // العيادات بتتأخر، وطبيب قعد أطول من مدة الـ slot لازم يكمّل مكالمته من غير
-        // ما الصفحة تقفل الميتينج (وبالتبعية الكشف) من ورا ظهره عند أي refresh.
-        // فبنعتمد على حالة الاجتماع من السيرفر بس: Completed(2) أو Canceled(3).
-        if (res?.status === 2 || res?.status === 3) {
-          const message = res?.status === 3
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        if (data?.status === 2 || data?.status === 3) {
+          const message = data?.status === 3
             ? 'هذه الجلسة تم إلغاؤها'
             : 'هذه الجلسة انتهت بالفعل';
           this.toastr.warning(message);
@@ -68,8 +64,8 @@ export class DoctorViewVideoCallComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.meetingReport = res;
-        this.diagnosisState.setFromMeetingReport(this.meetingId, res?.diagnoses);
+        this.meetingReport = data;
+        this.diagnosisState.setFromMeetingReport(this.meetingId, data?.diagnoses);
         this.isMeetingValid = true;
         this.isValidating = false;
       },
@@ -89,9 +85,10 @@ export class DoctorViewVideoCallComponent implements OnInit, OnDestroy {
   refreshMeetingReport() {
     if (!this.meetingId) return;
     this.doctorService.getReports(this.meetingId).subscribe({
-      next: (res) => {
-        this.meetingReport = res;
-        this.diagnosisState.setFromMeetingReport(this.meetingId, res?.diagnoses);
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.meetingReport = data;
+        this.diagnosisState.setFromMeetingReport(this.meetingId, data?.diagnoses);
       },
       error: () => {
         // بنسيب آخر نسخة موجودة — فشل تحديث ماينفعش يقطع المكالمة.

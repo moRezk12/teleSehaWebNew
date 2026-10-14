@@ -51,8 +51,9 @@ export class PatientSendPictureVideoCallComponent implements OnInit {
 
   getImages(){
     this.patientVideoCall.getMeetingDetails(Number(this.id)).subscribe({
-      next: (res) => {
-        const images = res.images;
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        const images = data?.images ?? [];
         this.images = images.map((image: any) => ({
           src:  image.url,
           alt: image.url,

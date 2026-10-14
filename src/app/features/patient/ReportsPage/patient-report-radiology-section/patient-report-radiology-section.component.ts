@@ -62,7 +62,7 @@ export class PatientReportRadiologySectionComponent implements OnInit {
     if (!patients) return;
     this.prescriptionServices.getAllRadiology(patients).subscribe({
       next: (res: any) => {
-        this.data = res;
+        this.data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log(err);

@@ -15,17 +15,18 @@ export class DoctorRegistrationStateService {
   readonly doctorImage = this._doctorImage.asReadonly();
 
   hydrateFromRegistrationResponse(res: any): void {
-    if (res?.data?.doctorId) {
-      this._doctorId.set(res.data.doctorId.toString());
+    const data = res?.data ?? res;
+    if (data?.doctorId) {
+      this._doctorId.set(data.doctorId.toString());
     }
-    if (res?.data?.doctorProfileId) {
-      this._doctorProfileId.set(res.data.doctorProfileId.toString());
+    if (data?.doctorProfileId) {
+      this._doctorProfileId.set(data.doctorProfileId.toString());
     }
-    if (res?.data?.doctorCertificatesId) {
-      this._doctorCertificatesId.set(res.data.doctorCertificatesId.toString());
+    if (data?.doctorCertificatesId) {
+      this._doctorCertificatesId.set(data.doctorCertificatesId.toString());
     }
-    if (res?.data?.Image || res?.data?.image) {
-      this._doctorImage.set(res.data.Image || res.data.image);
+    if (data?.Image || data?.image) {
+      this._doctorImage.set(data.Image || data.image);
     }
   }
 

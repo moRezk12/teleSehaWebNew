@@ -20,10 +20,11 @@ export class PatientRegistrationListsStateService {
     return this.patientAuthService.getInfoLists().pipe(
       catchError(() => of({})),
       tap((res: any) => {
-        this._countries.set(res.countries || []);
-        this._maritalStatus.set(res.maritalStatus || []);
-        const rawJobs = res.jobTitles || res.jobTitle || [];
-        const mappedJobs = rawJobs.map((item: any) => {
+        const data = res?.data ?? res;
+        this._countries.set(data?.countries || []);
+        this._maritalStatus.set(data?.maritalStatus || []);
+        const rawJobs = data?.jobTitles || data?.jobTitle || [];
+        const mappedJobs = (Array.isArray(rawJobs) ? rawJobs : []).map((item: any) => {
           if (typeof item === 'string') return item;
           return item.titleAr || item.titleEn || item.nameAr || item.nameEn || item.name || item.title || '';
         }).filter(Boolean);

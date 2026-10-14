@@ -188,7 +188,8 @@ export class DoctorPasswordComponent implements OnInit {
         this.globalUserStateService.hydrateFromLoginResponse(res);
         this.localStorageService.hydrateFromLoginResponse(res);
 
-        switch (res.nextStep) {
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        switch (nextStep) {
           case INextStepEnum.CreatePassword:
             this.route.navigate(['doctor/auth/password'], { replaceUrl: true });
             break;
@@ -239,7 +240,8 @@ export class DoctorPasswordComponent implements OnInit {
         this.globalUserStateService.hydrateFromLoginResponse(res);
         this.localStorageService.hydrateFromLoginResponse(res);
 
-        switch (res.nextStep) {
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        switch (nextStep) {
           case INextStepEnum.CreateProfile:
             this.route.navigate(['doctor/auth/register/basicInfo'], { replaceUrl: true });
             break;

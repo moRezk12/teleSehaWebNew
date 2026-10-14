@@ -74,48 +74,50 @@ export class LocalstorageService {
    * بتملأ كل الـ in-memory state من الـ API response.
    */
   hydrateFromLoginResponse(res: any): void {
+    const data = res?.data ?? res;
     // Tokens
-    if (res?.data?.accessToken) {
-      this._accessToken.set(res.data.accessToken);
+    if (data?.accessToken) {
+      this._accessToken.set(data.accessToken);
     }
-    if (res?.data?.refreshToken) {
-      this._refreshToken.set(res.data.refreshToken);
+    if (data?.refreshToken) {
+      this._refreshToken.set(data.refreshToken);
       // الـ refreshToken هو الحاجة الوحيدة اللي بنحفظها في localStorage
       if (isPlatformBrowser(this.platformId)) {
-        localStorage.setItem('refreshToken', res.data.refreshToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
       }
     }
 
     // NextStep
-    if (res?.nextStep) {
-      this._nextStepEnum.set(res.nextStep);
+    const nextStep = res?.meta?.nextStep ?? res?.nextStep ?? data?.nextStep;
+    if (nextStep) {
+      this._nextStepEnum.set(nextStep);
     }
 
     // Role
-    if (res?.data?.user?.role) {
-      this._role.set(res.data.user.role);
+    if (data?.user?.role) {
+      this._role.set(data.user.role);
     }
 
     // Doctor data
-    if (res?.data?.user?.doctor) {
-      const doctor = res.data.user.doctor;
+    if (data?.user?.doctor) {
+      const doctor = data.user.doctor;
       this._doctorId.set(doctor.doctorId?.toString() || '');
       this._doctorName.set(doctor.name || '');
       this._doctorImage.set(doctor.imageUrl || '');
     }
 
     // Patient data
-    if (res?.data?.user?.patients?.length > 0) {
-      const firstPatient = res.data.user.patients[0];
+    if (data?.user?.patients?.length > 0) {
+      const firstPatient = data.user.patients[0];
       this._patientName.set(firstPatient.name || '');
       this._patientId.set(firstPatient.patientId?.toString() || '');
       this._loggedInPatientId.set(firstPatient.patientId?.toString() || null);
-      this._patients.set(res.data.user.patients);
+      this._patients.set(data.user.patients);
     }
 
     // Role from JWT if not in response
-    if (!res?.data?.user?.role && res?.data?.accessToken) {
-      const payload = decodeJwtPayload<JwtUserClaims>(res.data.accessToken);
+    if (!data?.user?.role && data?.accessToken) {
+      const payload = decodeJwtPayload<JwtUserClaims>(data.accessToken);
       const details = getJwtUserDetails(payload);
       if (details?.role) this._role.set(details.role);
       if (details?.userId) this._userId.set(details.userId);
@@ -129,8 +131,9 @@ export class LocalstorageService {
    * الـ registration responses مبترجعش tokens جديدة — بس بتحدث nextStep و data.
    */
   hydrateFromRegistrationResponse(res: any): void {
-    if (res?.nextStep) {
-      this._nextStepEnum.set(res.nextStep);
+    const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+    if (nextStep) {
+      this._nextStepEnum.set(nextStep);
     }
     if (res?.data?.doctorId) {
       this._doctorId.set(res.data.doctorId.toString());

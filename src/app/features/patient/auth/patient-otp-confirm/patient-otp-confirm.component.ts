@@ -113,10 +113,14 @@ export class PatientOtpConfirmComponent {
       next: (res: any) => {
         this.isLoading = false;
         this.toastr.success('OTP Confirmed Successfully');
-        this.setCookie('createPasswordToken', res.data, 1);
-        this.authProcessStateService.setCreatePasswordToken(res.data);
-        if (res.nextStep === INextStepEnum.CreatePassword) {
-          this.globalUserStateService.hydrateNextStep(res.nextStep);
+        const token = res?.data?.token || (typeof res?.data === 'string' ? res.data : null) || res?.token || res?.data;
+        if (token) {
+          this.setCookie('createPasswordToken', token, 1);
+          this.authProcessStateService.setCreatePasswordToken(token);
+        }
+        const nextStep = res?.meta?.nextStep ?? res?.nextStep;
+        if (nextStep === INextStepEnum.CreatePassword) {
+          this.globalUserStateService.hydrateNextStep(nextStep);
           this.route.navigate(['patient/auth/password'], { replaceUrl: true });
         }
       },

@@ -77,7 +77,7 @@ export class DoctorAlldoctorsSectionComponent implements OnInit {
     this.specailtiesService.getSpecialties().subscribe({
       next: (res: any) => {
         console.log(res);
-        this.specialties = res.data || res;
+        this.specialties = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
       },
       error: (err) => {
         console.log(err);
@@ -107,7 +107,7 @@ export class DoctorAlldoctorsSectionComponent implements OnInit {
       )
       .subscribe({
         next: (res: any) => {
-          const newDoctors = res.data || res;
+          const newDoctors = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
 
           if (from) {
             this.doctors = [...this.doctors, ...newDoctors];

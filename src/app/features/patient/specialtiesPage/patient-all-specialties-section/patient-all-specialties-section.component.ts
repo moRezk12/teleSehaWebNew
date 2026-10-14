@@ -29,7 +29,7 @@ export class PatientAllSpecialtiesSectionComponent implements OnInit {
     this.specialtiesService.getSpecialties().subscribe((res: any) => {
       console.log(res);
 
-      this.specialties = res.data || res;
+      this.specialties = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
     });
   }
 

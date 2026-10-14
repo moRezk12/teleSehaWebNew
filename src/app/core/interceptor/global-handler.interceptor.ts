@@ -52,39 +52,53 @@ export const globalHandlerInterceptor: HttpInterceptorFn = (req, next) => {
           if (apiError) {
             if (typeof apiError === 'string') {
               errorMsgs.push(apiError);
-            } else if (apiError.message || apiError.Message) {
-              const rawMsg = apiError.message || apiError.Message;
-
-              // Check if it is a JSON parsing SyntaxError (happens when backend returns plain text instead of JSON)
-              const isJsonParseError = 
-                rawMsg.includes('is not valid JSON') || 
-                rawMsg.includes('JSON.parse') || 
-                rawMsg.includes('JSON Parse error') ||
-                rawMsg.includes('Unexpected token');
-
-              if (isJsonParseError) {
-                // Try to extract any double-quoted text which contains the raw text response
-                const quoteMatch = rawMsg.match(/"([^"]+)"/);
-                if (quoteMatch && quoteMatch[1]) {
-                  errorMsgs.push(quoteMatch[1].trim());
-                } else {
-                  // Fallback to error statusText or clean message instead of technical JSON parsing error
-                  errorMsgs.push(error.statusText || '');
-                }
-              } else {
-                errorMsgs.push(rawMsg);
-              }
-            } else if (apiError.errors) {
-              // Handle validation errors from ModelState or FluentValidation
-              Object.entries(apiError.errors).forEach(([key, messages]: [string, any]) => {
-                if (Array.isArray(messages)) {
-                  messages.forEach((msg: string) => {
-                    errorMsgs.push(`${key}: ${msg}`);
+            } else {
+              if (apiError.errors) {
+                // Handle unified IApiResponse errors array [ { code, message, field } ] or dictionary
+                if (Array.isArray(apiError.errors)) {
+                  apiError.errors.forEach((errItem: any) => {
+                    if (typeof errItem === 'string') {
+                      errorMsgs.push(errItem);
+                    } else if (errItem && typeof errItem === 'object') {
+                      const field = errItem.field ? `${errItem.field}: ` : '';
+                      const msg = errItem.message || errItem.code || '';
+                      if (msg) errorMsgs.push(`${field}${msg}`);
+                    }
                   });
-                } else if (typeof messages === 'string') {
-                  errorMsgs.push(`${key}: ${messages}`);
+                } else if (typeof apiError.errors === 'object') {
+                  Object.entries(apiError.errors).forEach(([key, messages]: [string, any]) => {
+                    if (Array.isArray(messages)) {
+                      messages.forEach((msg: string) => {
+                        errorMsgs.push(`${key}: ${msg}`);
+                      });
+                    } else if (typeof messages === 'string') {
+                      errorMsgs.push(`${key}: ${messages}`);
+                    }
+                  });
                 }
-              });
+              }
+
+              if (errorMsgs.length === 0 && (apiError.message || apiError.Message)) {
+                const rawMsg = apiError.message || apiError.Message;
+
+                // Check if it is a JSON parsing SyntaxError (happens when backend returns plain text instead of JSON)
+                const isJsonParseError = 
+                  rawMsg.includes('is not valid JSON') || 
+                  rawMsg.includes('JSON.parse') || 
+                  rawMsg.includes('JSON Parse error') ||
+                  rawMsg.includes('Unexpected token');
+
+                if (isJsonParseError) {
+                  const quoteMatch = rawMsg.match(/"([^"]+)"/);
+                  if (quoteMatch && quoteMatch[1]) {
+                    errorMsgs.push(quoteMatch[1].trim());
+                  } else {
+                    errorMsgs.push(error.statusText || '');
+                  }
+                } else {
+                  errorMsgs.push(rawMsg);
+                }
+              }
             }
           }
 

@@ -117,17 +117,18 @@ export class PatientViewVideoCallComponent implements OnInit {
   }
   getMeetingReportsByCheckup(sessionId: number) {
     this.patientVideoCall.getMeetingReportsByCheckup(sessionId).subscribe({
-      next: (res) => {
-        this.meetingReport = res;
-        this.meetingId = res?.meetingId;
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        this.meetingReport = data;
+        this.meetingId = data?.meetingId;
         this.currentSection = 0;
 
         // حالة الاجتماع بتيجي من السيرفر بس — مش من ساعة المتصفح. العيادات بتتأخر،
         // فطالما الطبيب لسه ماقفلش المكالمة المريض يفضل جواها حتى لو عدّت مدة الـ slot.
         // بنطرد المريض بس لو السيرفر قال Completed(2) أو Canceled(3)؛ إنهاء المكالمة
         // الحقيقي بيوصل لحظيًا عبر meetingEvents$ (meeting_closed).
-        if (res?.status === 2 || res?.status === 3) {
-          const message = res?.status === 3
+        if (data?.status === 2 || data?.status === 3) {
+          const message = data?.status === 3
             ? 'هذه الجلسة تم إلغاؤها'
             : 'هذه الجلسة انتهت بالفعل';
           this.toastr.warning(message);
@@ -144,7 +145,7 @@ export class PatientViewVideoCallComponent implements OnInit {
           // used to send doctor_id = 0 and the rating never reached the doctor's aggregates.
           this.ratingForm.patchValue({
             meeting_id: this.meetingId,
-            doctor_id: res?.doctorId ?? this.ratingForm.value.doctor_id ?? 0,
+            doctor_id: data?.doctorId ?? res?.doctorId ?? this.ratingForm.value.doctor_id ?? 0,
           });
           this.getMettingDetails();
         }
@@ -234,8 +235,8 @@ export class PatientViewVideoCallComponent implements OnInit {
       return;
     }
     this.patientVideoCall.getMeetingReportsByCheckup(this.sessionId).subscribe({
-      next: (res) => {
-        this.meetingReport = res;
+      next: (res: any) => {
+        this.meetingReport = res?.data ?? res;
         if (openPopup) {
           this.showPopupPrescription = true;
         }
@@ -315,12 +316,25 @@ export class PatientViewVideoCallComponent implements OnInit {
           return;
         }
 
+        if (Array.isArray(apiError?.errors)) {
+          apiError.errors.forEach((errItem: any) => {
+            const msg = errItem?.message || errItem;
+            const field = errItem?.field ? `${errItem.field}: ` : '';
+            this.toastr.error(`${field}${msg}`);
+          });
+          return;
+        }
+
         if (apiError?.errors) {
           Object.entries(apiError.errors).forEach(
             ([key, messages]: [string, any]) => {
-              messages.forEach((msg: string) => {
-                this.toastr.error(`${key} : ${msg}`);
-              });
+              if (Array.isArray(messages)) {
+                messages.forEach((msg: string) => {
+                  this.toastr.error(`${key} : ${msg}`);
+                });
+              } else {
+                this.toastr.error(`${key} : ${messages}`);
+              }
             },
           );
           return;
