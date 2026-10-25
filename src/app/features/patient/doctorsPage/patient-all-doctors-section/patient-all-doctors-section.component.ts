@@ -96,51 +96,66 @@ export class PatientAllDoctorsSectionComponent implements OnInit {
 
   searchSubject = new Subject<string>();
 
-  // doctors: any[] = [];
-  loadingMore = false;
+  page: number = 1;
+  pageSize: number = 10;
+  totalCount: number = 0;
+  totalPages: number = 1;
+  isLoading: boolean = false;
 
-  getDoctors(
-    LastId: number | null = null,
-    from: number | null = null,
-    SortBy: string | null = null,
-  ) {
-    console.log(LastId , from, SortBy);
+  getDoctors(page: number = 1) {
+    this.page = page;
+    this.isLoading = true;
 
     this.doctorsService
-      .getDoctors(
-        this.searchText || null,
-        this.selectedSpeciality,
-        null,
-        this.maxPrice,
-        this.availableDate,
-        null,
-        from,
-        LastId,
-        SortBy,
-      )
+      .getDoctors({
+        Search: this.searchText?.trim() || null,
+        SpecialityId: this.selectedSpeciality,
+        MaxPrice: this.maxPrice || null,
+        AvailableDate: this.availableDate || null,
+        page: this.page,
+        pageSize: this.pageSize,
+      })
       .subscribe({
         next: (res: any) => {
-          const newDoctors = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          const newDoctors = Array.isArray(res?.data)
+            ? res.data
+            : (Array.isArray(res?.data?.items)
+              ? res.data.items
+              : (Array.isArray(res) ? res : []));
 
-          if (from || LastId) {
-            this.doctors = [...this.doctors, ...newDoctors];
-            console.log("Doctors:", this.doctors);
+          this.doctors = newDoctors;
 
+          const total = res?.totalCount
+            ?? res?.data?.totalCount
+            ?? res?.meta?.totalCount
+            ?? res?.total
+            ?? res?.data?.total
+            ?? res?.count;
+
+          if (typeof total === 'number') {
+            this.totalCount = total;
+            this.totalPages = Math.max(1, Math.ceil(total / this.pageSize));
           } else {
-            this.doctors = newDoctors;
+            if (newDoctors.length < this.pageSize) {
+              this.totalCount = (this.page - 1) * this.pageSize + newDoctors.length;
+              this.totalPages = this.page;
+            } else {
+              this.totalPages = this.page + 1;
+            }
           }
 
-          this.loadingMore = false;
+          this.isLoading = false;
         },
         error: (err) => {
-          console.log(err);
-          this.loadingMore = false;
+          console.error('Error fetching doctors:', err);
+          this.isLoading = false;
         },
       });
   }
 
   applyFilters() {
-    this.getDoctors();
+    this.page = 1;
+    this.getDoctors(1);
   }
 
   resetFilters() {
@@ -149,30 +164,36 @@ export class PatientAllDoctorsSectionComponent implements OnInit {
     this.maxPrice = 500;
     this.availableDate = null;
     this.selectedSpeciality = null;
-    this.getDoctors();
+    this.page = 1;
+    this.getDoctors(1);
   }
 
   onSearchChange() {
     this.searchSubject.next(this.searchText);
   }
 
-  loadMore() {
-    if (!this.doctors.length) return;
-
-    this.loadingMore = true;
-
-    const lastId = this.doctors[this.doctors.length - 1].doctorId;
-    const from = this.doctors[this.doctors.length - 1].rating;
-    const sortby = 'HeighestRating';
-    console.log(lastId);
-    console.log(from);
-    console.log(sortby);
-
-    this.getDoctors(lastId , from, sortby);
+  onPageChange(page: number) {
+    if (page < 1 || page > this.totalPages || page === this.page || this.isLoading) {
+      return;
+    }
+    this.getDoctors(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  onPageChange(page: number) {
-    this.filterForm.patchValue({ From: page });
+  get pagesArray(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.page - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   doctorId: number | null = null;

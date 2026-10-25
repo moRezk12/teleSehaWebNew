@@ -13,20 +13,31 @@ export class SearchForDoctorAllDoctorComponent {
   constructor(readonly doctorsService: DoctorsService) {}
 
   doctors: IDoctorResponse[] = [];
+  page: number = 1;
+  pageSize: number = 6;
 
   ngOnInit(): void {
     this.listenToDoctors();
   }
 
   listenToDoctors() {
-    this.doctorsService.getDoctors().subscribe({
-      next: (res: any) => {
-        this.doctors = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        console.log('Doctors:', this.doctors);
-      },
-      error: (err) => {
-        console.log(err);
-      },
-    });
+    this.doctorsService
+      .getDoctors({
+        page: this.page,
+        pageSize: this.pageSize,
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.doctors = Array.isArray(res?.data)
+            ? res.data
+            : (Array.isArray(res?.data?.items)
+              ? res.data.items
+              : (Array.isArray(res) ? res : []));
+          console.log('Doctors:', this.doctors);
+        },
+        error: (err) => {
+          console.error(err);
+        },
+      });
   }
 }

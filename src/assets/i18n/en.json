@@ -205,6 +205,15 @@
     "booking": "Book Now",
     "viewProfile": "View Profile",
     "viewMore": "View More",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "pageOf": "Page {{current}} of {{total}}",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "doctors",
+    "sortBy": "Sort By",
     "noDoctors": "No Doctors Found",
     "explainsClearly": "Explains clearly",
     "goodListener": "Good listener",
@@ -400,5 +409,16 @@
     "Completed": "Completed",
     "Canceled": "Canceled",
     "Rescheduled": "Rescheduled"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "pageOf": "Page {{current}} of {{total}}",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "doctors",
+    "noData": "No results found"
   }
 }

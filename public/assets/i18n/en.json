@@ -395,5 +395,17 @@
     "Completed": "Completed",
     "Canceled": "Canceled",
     "Rescheduled": "Rescheduled"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "pageOf": "Page {{current}} of {{total}}",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "doctors",
+    "noData": "No results found"
   }
 }
+

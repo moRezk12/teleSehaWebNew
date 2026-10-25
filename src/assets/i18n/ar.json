@@ -205,6 +205,15 @@
     "booking": "احجز الآن",
     "viewProfile": "عرض الملف الشخصي",
     "viewMore": "عرض المزيد",
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "صفحة",
+    "pageOf": "صفحة {{current}} من {{total}}",
+    "showing": "عرض",
+    "to": "إلى",
+    "of": "من",
+    "results": "طبيب",
+    "sortBy": "الترتيب",
     "noDoctors": "لم يتم العثور على أطباء",
     "explainsClearly": "يشرح بوضوح",
     "goodListener": "مستمع جيد",
@@ -400,5 +409,16 @@
     "Completed": "مكتمل",
     "Canceled": "ملغي",
     "Rescheduled": "معاد جدولته"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "page": "صفحة",
+    "pageOf": "صفحة {{current}} من {{total}}",
+    "showing": "عرض",
+    "to": "إلى",
+    "of": "من",
+    "results": "طبيب",
+    "noData": "لا توجد نتائج"
   }
 }

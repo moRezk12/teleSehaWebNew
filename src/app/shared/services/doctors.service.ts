@@ -7,12 +7,43 @@ import { IDoctorResponse } from '../interface/doctor.interface';
 import { SKIP_GLOBAL_ERROR_HANDLING } from '../../core/interceptor/global-handler.interceptor';
 import { SKIP_GLOBAL_LOADING } from '../../core/interceptor/loading.interceptor';
 
+export type ScientificDegree = 'Bachelor' | 'Master' | 'Doctorate';
+
+export type DoctorSortBy =
+  | 'HeighestPrice'
+  | 'LowestPrice'
+  | 'HeighestRating'
+  | 'LowestRating'
+  | 'HeighestSuccessfuls'
+  | 'LowestSuccessfuls'
+  | 'HeighestReadmissionRate'
+  | 'LowestReadmissionRate'
+  | 'HeighestConsultationCompletionRate'
+  | 'LowestConsultationCompletionRate'
+  | 'HeighestConsultationCancelationRate'
+  | 'LowestConsultationCancelationRate'
+  | 'HeighestNoShowRate'
+  | 'LowestNoShowRate';
+
+export interface IGetDoctorsParams {
+  Search?: string | null;
+  SpecialityId?: number | null;
+  ScientificDegree?: ScientificDegree | string | null;
+  MaxPrice?: number | null;
+  AvailableDate?: string | null;
+  ReadmissionRate?: number | null;
+  SortBy?: DoctorSortBy | string | null;
+  page?: number | null;
+  pageSize?: number | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class DoctorsService {
   constructor(readonly http: HttpClient) {}
 
+  getDoctors(params?: IGetDoctorsParams): Observable<IApiResponse<IDoctorResponse[]> & IDoctorResponse>;
   getDoctors(
     Search?: string | null,
     SpecialityId?: number | null,
@@ -20,38 +51,87 @@ export class DoctorsService {
     MaxPrice?: number | null,
     AvailableDate?: string | null,
     ReadmissionRate?: number | null,
-    From?: number | null,
-    // Limit?: number | null,
-    LastId?: number | null,
     SortBy?: string | null,
+    page?: number | null,
+    pageSize?: number | null,
+  ): Observable<IApiResponse<IDoctorResponse[]> & IDoctorResponse>;
+  getDoctors(
+    searchOrParams?: string | IGetDoctorsParams | null,
+    SpecialityId?: number | null,
+    ScientificDegree?: string | null,
+    MaxPrice?: number | null,
+    AvailableDate?: string | null,
+    ReadmissionRate?: number | null,
+    arg7?: string | number | null,
+    arg8?: number | null,
+    arg9?: string | number | null,
   ): Observable<IApiResponse<IDoctorResponse[]> & IDoctorResponse> {
     let params = new HttpParams();
 
-    if (Search) params = params.set('Search', Search);
-    if (SpecialityId !== null && SpecialityId !== undefined)
-      params = params.set('SpecialityId', SpecialityId);
+    if (searchOrParams && typeof searchOrParams === 'object') {
+      const p = searchOrParams;
+      if (p.Search) params = params.set('Search', p.Search);
+      if (p.SpecialityId !== null && p.SpecialityId !== undefined)
+        params = params.set('SpecialityId', p.SpecialityId);
 
-    if (ScientificDegree)
-      params = params.set('ScientificDegree', ScientificDegree);
+      if (p.ScientificDegree)
+        params = params.set('ScientificDegree', p.ScientificDegree);
 
-    if (MaxPrice !== null && MaxPrice !== undefined)
-      params = params.set('MaxPrice', MaxPrice);
+      if (p.MaxPrice !== null && p.MaxPrice !== undefined)
+        params = params.set('MaxPrice', p.MaxPrice);
 
-    if (AvailableDate) params = params.set('AvailableDate', AvailableDate);
+      if (p.AvailableDate) params = params.set('AvailableDate', p.AvailableDate);
 
-    if (ReadmissionRate !== null && ReadmissionRate !== undefined)
-      params = params.set('ReadmissionRate', ReadmissionRate);
+      if (p.ReadmissionRate !== null && p.ReadmissionRate !== undefined)
+        params = params.set('ReadmissionRate', p.ReadmissionRate);
 
-    if (From !== null && From !== undefined) params = params.set('From', From);
+      if (p.SortBy) params = params.set('SortBy', p.SortBy);
 
-    if (LastId !== null && LastId !== undefined)
-      params = params.set('LastId', LastId);
+      if (p.page !== null && p.page !== undefined)
+        params = params.set('page', p.page);
 
-    if (SortBy !== null && SortBy !== undefined)
-      params = params.set('SortBy', SortBy);
+      if (p.pageSize !== null && p.pageSize !== undefined)
+        params = params.set('pageSize', p.pageSize);
+    } else {
+      const Search = searchOrParams as string | null | undefined;
+      if (Search) params = params.set('Search', Search);
+      if (SpecialityId !== null && SpecialityId !== undefined)
+        params = params.set('SpecialityId', SpecialityId);
 
-    // if (Limit !== null && Limit !== undefined)
-    //   params = params.set('Limit', Limit);
+      if (ScientificDegree)
+        params = params.set('ScientificDegree', ScientificDegree);
+
+      if (MaxPrice !== null && MaxPrice !== undefined)
+        params = params.set('MaxPrice', MaxPrice);
+
+      if (AvailableDate) params = params.set('AvailableDate', AvailableDate);
+
+      if (ReadmissionRate !== null && ReadmissionRate !== undefined)
+        params = params.set('ReadmissionRate', ReadmissionRate);
+
+      let sortByVal: string | null = null;
+      let pageVal: number | null = null;
+      let pageSizeVal: number | null = null;
+
+      if (typeof arg7 === 'string') {
+        sortByVal = arg7;
+        pageVal = typeof arg8 === 'number' ? arg8 : null;
+        pageSizeVal = typeof arg9 === 'number' ? arg9 : null;
+      } else if (typeof arg7 === 'number') {
+        pageVal = arg7;
+        pageSizeVal = typeof arg8 === 'number' ? arg8 : null;
+        if (typeof arg9 === 'string') sortByVal = arg9;
+      } else {
+        pageVal = typeof arg8 === 'number' ? arg8 : null;
+        pageSizeVal = typeof arg9 === 'number' ? arg9 : null;
+      }
+
+      if (sortByVal) params = params.set('SortBy', sortByVal);
+      if (pageVal !== null && pageVal !== undefined)
+        params = params.set('page', pageVal);
+      if (pageSizeVal !== null && pageSizeVal !== undefined)
+        params = params.set('pageSize', pageSizeVal);
+    }
 
     return this.http.get<IApiResponse<IDoctorResponse[]> & IDoctorResponse>(`${Environment.apiUrl}/api/doctor`, {
       params,

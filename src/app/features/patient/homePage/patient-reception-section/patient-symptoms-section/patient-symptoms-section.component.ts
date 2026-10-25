@@ -54,7 +54,12 @@ export class PatientSymptomsSectionComponent {
     if (this.patientId) {
       this.patientService.receiption(this.patientId, this.text).subscribe({
         next: (res : any) => {
-          this.speciality = res?.speciality;
+          const speciality = res.data?.speciality;
+          if (!res.success || !speciality?.trim()) {
+            this.toastr.error('تعذر تحديد التخصص المناسب.');
+            return;
+          }
+          this.speciality = speciality;
           this.sendForm = false;
           this.payNow = true;
         },
