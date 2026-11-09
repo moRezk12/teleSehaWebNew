@@ -1,0 +1,1 @@
+import{Qc as n,fb as t}from"./chunk-LLMC5RO2.js";import"./chunk-UVUYC35V.js";var p=class e{static \u0275fac=function(o){return new(o||e)};static \u0275cmp=t({type:e,selectors:[["app-doctor-details-of-week-appointments"]],decls:0,vars:0,template:function(o,s){},dependencies:[n],encapsulation:2})};export{p as DoctorDetailsOfWeekAppointmentsComponent};

@@ -1,0 +1,1 @@
+import{n as p}from"./chunk-5GPZFXSS.js";import{g as i}from"./chunk-ID6FGQKQ.js";import{V as r,_ as e}from"./chunk-LLMC5RO2.js";var n=class t{constructor(o){this.http=o}support(o){return this.http.post(`${p.apiUrl}/api/support`,o)}static \u0275fac=function(a){return new(a||t)(e(i))};static \u0275prov=r({token:t,factory:t.\u0275fac,providedIn:"root"})};export{n as a};

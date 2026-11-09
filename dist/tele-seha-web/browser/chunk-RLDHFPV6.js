@@ -1,0 +1,1 @@
+import{V as s}from"./chunk-LLMC5RO2.js";var i=class t{sessionItem;setItem(e){this.sessionItem=e}getItem(){return this.sessionItem}clear(){this.sessionItem=null}static \u0275fac=function(n){return new(n||t)};static \u0275prov=s({token:t,factory:t.\u0275fac,providedIn:"root"})};export{i as a};
