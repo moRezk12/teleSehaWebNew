@@ -17,7 +17,6 @@
       </div>
     </div>
 
-    <!-- Appointments Content -->
     @if(hasAppointments()) {
       <div class="grid grid-cols-1 gap-4">
         @for (session of allAppointments; track session.sessionId) {
